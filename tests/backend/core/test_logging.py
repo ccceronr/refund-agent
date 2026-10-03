@@ -3,29 +3,12 @@
 import io
 import json
 import logging
-from collections.abc import Iterator
+import sys
 
 import pytest
 import structlog
 
-from app.core.logging import configure_logging
-
-
-@pytest.fixture
-def log_output() -> Iterator[io.StringIO]:
-    configure_logging()
-    handler = next(
-        h
-        for h in logging.getLogger().handlers
-        if isinstance(h, logging.StreamHandler)
-        and isinstance(h.formatter, structlog.stdlib.ProcessorFormatter)
-    )
-    stream = io.StringIO()
-    previous = handler.setStream(stream)
-    try:
-        yield stream
-    finally:
-        handler.setStream(previous)
+from app.core.logging import configure_logging, error_trace
 
 
 def _last_line(stream: io.StringIO) -> dict[str, object]:
@@ -57,3 +40,32 @@ def test_uvicorn_logs_are_json_lines_too(log_output: io.StringIO) -> None:
     line = _last_line(log_output)
     assert line["event"] == "Started server process"
     assert line["level"] == "info"
+
+
+def test_error_logs_carry_the_trace_but_never_the_message(log_output: io.StringIO) -> None:
+    # Exception messages can carry member data (CLAUDE.md: no names or accounts in logs).
+    member_data = "Ana Lopez ••4210"
+    try:
+        raise ValueError(member_data)
+    except ValueError as error:
+        structlog.get_logger("app.test").error("run_crashed", **error_trace(error))
+
+    line = _last_line(log_output)
+    assert line["error_type"] == "ValueError"
+    assert "test_error_logs_carry_the_trace_but_never_the_message" in str(line["traceback"])
+    assert "Ana" not in log_output.getvalue()
+    assert "4210" not in log_output.getvalue()
+
+
+def test_a_cli_can_send_its_logs_to_stderr_and_keep_stdout_for_its_report(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    configure_logging(sys.stderr)
+    try:
+        structlog.get_logger("app.test").info("case_prepared")
+        captured = capsys.readouterr()
+    finally:
+        configure_logging()
+
+    assert "case_prepared" in captured.err
+    assert captured.out == ""

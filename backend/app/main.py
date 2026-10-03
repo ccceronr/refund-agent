@@ -10,6 +10,7 @@ from pathlib import Path
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.api.errors import register_error_handlers
@@ -32,6 +33,7 @@ from app.core.config import Settings
 from app.core.logging import configure_logging
 from app.core.version import APP_VERSION
 from app.db.engines import create_rw_engine
+from app.services.runs import recover_interrupted_runs
 
 STATIC_DIR = Path(__file__).parent / "static"
 DOCS_URL = "/docs"
@@ -72,10 +74,20 @@ def _dispose_on_shutdown(
 ) -> Callable[[FastAPI], AbstractAsyncContextManager[None]]:
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        await _recover_interrupted_runs(engine)
         yield
         await engine.dispose()
 
     return lifespan
+
+
+async def _recover_interrupted_runs(engine: AsyncEngine) -> None:
+    # design §5.2: runs left `running` by a crash become TIMEOUT manual reviews. If the
+    # database is down the app still starts, so /api/health can report it.
+    try:
+        await recover_interrupted_runs(engine)
+    except (SQLAlchemyError, OSError) as error:
+        log.error("run_recovery_failed", error=type(error).__name__)
 
 
 def _serve_frontend(app: FastAPI, settings: Settings, static_dir: Path) -> None:

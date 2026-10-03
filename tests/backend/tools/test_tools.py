@@ -11,6 +11,7 @@ from app.db.engines import create_ro_engine
 from app.tools.queries import (
     find_fee_candidates,
     get_day_postings,
+    get_member_accounts,
     get_member_standing,
     get_refund_history,
     load_case,
@@ -105,3 +106,12 @@ async def test_recorder_times_each_tool_call(ro: AsyncConnection) -> None:
     assert standing.flags
     assert [(c.name, c.ok) for c in recorder.calls] == [("get_member_standing", True)]
     assert recorder.calls[0].latency_ms >= 0
+
+
+async def test_member_accounts_group_sub_accounts_under_each_account(ro: AsyncConnection) -> None:
+    accounts = await get_member_accounts(ro, ANA)
+
+    assert [(a.account_number, [s.id for s in a.sub_accounts]) for a in accounts] == [
+        ("884210", [1301, 1302]),
+        ("884211", [1303]),
+    ]

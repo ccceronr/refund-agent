@@ -120,9 +120,13 @@ The refund amount is always `abs(F.amount)` from the ledger (BR-10).
 - `AUTO_REFUND_ENABLED` is true
 - fee type is `COURTESY_PAY` and amount ≤ `AUTO_REFUND_MAX_AMOUNT`
 - `refunds_left_after >= 1` (never use the member's last available refund automatically)
-- every typed decision in the run came from Jev (not the fallback) with confidence
-  ≥ `AUTO_MIN_CONFIDENCE`; the fee was identified deterministically (single candidate) or
-  by Jev with confidence ≥ `AUTO_MIN_CONFIDENCE`
+- every typed decision that counts came from Jev (not the fallback) with confidence
+  ≥ `AUTO_MIN_CONFIDENCE`. The decisions that count are: the **intent**, the **language**,
+  the **fee** when Jev chose it among several candidates (a single candidate is identified
+  deterministically and passes), and the guard's two checks (**reply language** and
+  **reply outcome**, design §7.5).
+  Tone and the policy passage do **not** count: they only shape the wording and the quote
+  shown to Luis, never the money or what the member is told.
 - injection probability ≤ `AUTO_MAX_INJECTION`
 - the draft reply was written by the writer model (not the template fallback) and passed
   the output guard
@@ -196,5 +200,10 @@ real core integration would replace.
 | `TIMEOUT` | "Preparing this case took too long. Try again, or handle it yourself." |
 | `DATA_UNAVAILABLE` | "I couldn't read {name}'s account information. Try again in a moment." |
 | `REJECTED_BY_STAFF` | "You rejected the suggestion. Handle this one yourself." |
+
+`NOT_A_REFUND` is not a manual-review reason: it is the proposal's reason code when the
+message is not a refund request (intent `other_banking`, design §5.2). No rule is evaluated
+and no reply is drafted; the case status is `not_refund` and the UI shows "Not a refund
+request" (ui.md).
 
 No gendered pronouns in any generated UI text: repeat the first name instead.

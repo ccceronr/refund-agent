@@ -74,26 +74,26 @@ def template_key(recommendation: Recommendation, reason: ReasonCode) -> Template
     return "MANUAL"
 
 
-def render_template(
-    key: TemplateKey,
-    language: Language,
-    *,
-    first_name: str,
-    credit_union: str,
-    fee: FeeFacts | None,
-    claim_window_days: int,
-) -> str:
-    signature = _SIGNATURES[language].format(credit_union=credit_union)
+@dataclass(frozen=True)
+class TemplateContext:
+    first_name: str
+    credit_union: str
+    fee: FeeFacts | None  # None in manual cases without an identified fee
+    claim_window_days: int
+
+
+def render_template(key: TemplateKey, language: Language, context: TemplateContext) -> str:
+    signature = _SIGNATURES[language].format(credit_union=context.credit_union)
     values: dict[str, object] = {
-        "name": first_name,
+        "name": context.first_name,
         "signature": signature,
-        "days": claim_window_days,
+        "days": context.claim_window_days,
     }
-    if fee is not None:
+    if context.fee is not None:
         values |= {
-            "amount": money(fee.amount),
-            "fee": _fee_name(fee.fee_type, language),
-            "day": _long_day(fee.day, language),
+            "amount": money(context.fee.amount),
+            "fee": _fee_name(context.fee.fee_type, language),
+            "day": _long_day(context.fee.day, language),
         }
     return _TEMPLATES[(key, language)].format(**values)
 
