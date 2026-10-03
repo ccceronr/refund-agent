@@ -50,9 +50,9 @@ Accessible: WCAG AA contrast, keyboard navigable, visible focus, status not by c
 ```
 
 ### 2.1 Queue
-- Grouped sections, in order: **Ready for you**, **Needs your review**, **Needs a
-  supervisor**, **Not a refund**, **Done today** (includes "Refunded automatically").
-  Empty sections hidden.
+- Grouped sections, in order: **Ready for you**, **New** (not prepared yet, or being
+  prepared), **Needs your review**, **Needs a supervisor**, **Not a refund**, **Done
+  today** (includes "Refunded automatically"). Empty sections hidden.
 - Item: member name, topic, status label, relative time ("2 h ago"). Selected item has a
   terracotta left bar. Count per section.
 - Supervisor view (signed in as Marta): "Needs a supervisor" section first.
@@ -78,8 +78,9 @@ Member name, topic, received time, credit union (small, grey).
   `1. Card payment · City Power & Light  −$60.00  balance −$40.00`
   `2. Overdraft fee  −$35.00  balance −$75.00` (highlighted)
   `3. Paycheck · Acme Logistics  +$1,400.00  balance $1,325.00`
-  Caption: "The paycheck was processed after the fee. If it had come first, the balance
-  would never have gone below $0."
+  Caption (only when the BR-02 check passed and a deposit posted after the fee): "The
+  paycheck was processed after the fee. If it had come first, it would have covered the
+  payment."
   Clean the core descriptions for display ("Withdrawal Debit Card CITY POWER & LIGHT" →
   "Card payment · City Power & Light"; "Deposit ACH ACME LOGISTICS*PAYROLL" → "Paycheck ·
   Acme Logistics"). Keep the raw description available in a tooltip.

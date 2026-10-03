@@ -47,3 +47,7 @@ class WrongCredentials(PermissionError):
 
 class TooManyAttempts(PermissionError):
     """Too many failed sign-ins for this username (design §4.0)."""
+
+
+class PolicyNotFound(LookupError):
+    pass

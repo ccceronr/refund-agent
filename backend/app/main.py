@@ -41,6 +41,7 @@ from app.api.middleware import (
     SecurityHeadersMiddleware,
     UnhandledErrorMiddleware,
 )
+from app.api.policies import router as policies_router
 from app.api.rate_limit import RateLimits, build_limiter, enforce_rate_limit
 from app.core.config import Settings
 from app.core.logging import configure_logging
@@ -149,6 +150,7 @@ def _add_api_routes(app: FastAPI) -> None:
     api.include_router(health_router)
     api.include_router(auth_router)
     api.include_router(cases_router, dependencies=[Depends(current_staff)])
+    api.include_router(policies_router, dependencies=[Depends(current_staff)])
     app.include_router(api)
 
 

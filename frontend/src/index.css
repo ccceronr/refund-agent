@@ -1,7 +1,10 @@
 @import 'tailwindcss';
 
-/* Brand tokens (ui.md §1). Typography and the grey scale arrive with the UI (P7). */
+/* Brand tokens (ui.md §1). Greys lean toward navy. */
 @theme {
+  --font-serif: 'Newsreader Variable', Georgia, serif;
+  --font-sans: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
+
   --color-navy: #001d3d;
   --color-clay: #efeeed;
   --color-terracotta: #dc634b;
@@ -9,8 +12,36 @@
   --color-success: #2f7d5b;
   --color-error: #b42318;
   --color-warning: #b26b00;
+
+  --color-grey-50: #f7f7f8;
+  --color-grey-100: #ececee;
+  --color-grey-200: #dcdee3;
+  --color-grey-300: #bcc2cc;
+  --color-grey-400: #8d97a6;
+  --color-grey-500: #5d6879;
+  --color-grey-600: #44506a;
+  --color-grey-700: #2b3850;
+}
+
+html {
+  font-size: 15px;
 }
 
 body {
-  @apply bg-clay text-navy antialiased;
+  @apply bg-clay font-sans text-navy antialiased;
+  line-height: 1.6;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
