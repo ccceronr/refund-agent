@@ -156,7 +156,8 @@ The app is public on Railway and moves money (even fake), so every endpoint exce
 - `staff` gets `username` (unique) and `password_hash` (argon2id via `argon2-cffi`).
   Seed users `luis` (staff) and `marta` (supervisor); passwords from env
   (`SEED_PASSWORD_LUIS`, `SEED_PASSWORD_MARTA`), never committed. `S00` (system) cannot
-  log in.
+  log in. The seed stores the hashes on every run (also `--if-empty`), so changing a
+  variable rotates that password; in production it refuses to run without them.
 - `POST /auth/login {username, password}` → sets a session cookie; `POST /auth/logout`;
   `GET /auth/me` → `{name, role}`.
 - Session: Starlette `SessionMiddleware` (signed with `SESSION_SECRET`, ≥ 32 random
@@ -519,8 +520,10 @@ unless `APP_ENV != production`.
   with the `app_rw`/`agent_ro` passwords.
 - `FAULT_INJECTION` is ignored when `APP_ENV=production`.
 - Public URL: the app domain (the demo) and `<app-domain>/api/health`.
-- Rate limiting key: client IP from `X-Forwarded-For` (Railway proxy) — configure slowapi
-  accordingly. Limits apply only to `/api/*`.
+- Rate limiting key: in production the client IP from `X-Real-IP`, which Railway's edge
+  proxy sets (Railway docs, Public Networking → Specs & Limits; it does not document
+  `X-Forwarded-For`); locally the socket address, since a client could send the header
+  itself. Limits apply only to `/api/*` (a dependency of the `/api` router).
 
 ## 12. MCP server (P11, optional)
 `python -m app.mcp_server` (FastMCP) exposes the read-only tools (`get_member_accounts`,

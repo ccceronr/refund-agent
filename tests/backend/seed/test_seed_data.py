@@ -321,18 +321,17 @@ async def test_member_flags_match_the_standing_scenarios(db: asyncpg.Connection)
 
 
 async def test_reference_rows_staff_credit_unions_and_cases(db: asyncpg.Connection) -> None:
-    staff = await _rows(
-        db, "SELECT id, first_name, role, username, password_hash FROM staff ORDER BY id"
-    )
+    # Password hashes: test_seed_cli.py (they come from the environment, not the data).
+    staff = await _rows(db, "SELECT id, first_name, role, username FROM staff ORDER BY id")
     credit_unions = await _rows(db, "SELECT id, name FROM credit_unions ORDER BY id")
     case_statuses = await _rows(
         db, "SELECT status, count(*) FROM cases GROUP BY status ORDER BY status"
     )
 
     assert staff == [
-        ("S00", "Automatic refunds", "system", None, None),
-        ("S02", "Marta", "supervisor", "marta", None),
-        ("S14", "Luis", "staff", "luis", None),
+        ("S00", "Automatic refunds", "system", None),
+        ("S02", "Marta", "supervisor", "marta"),
+        ("S14", "Luis", "staff", "luis"),
     ]
     assert credit_unions == [(7, "Riverbend Credit Union"), (9, "Lakeside Community Credit Union")]
     assert case_statuses == [("new", 22), ("resolved", 1)]
@@ -398,3 +397,10 @@ async def test_policy_passages_are_the_spec_bullets_verbatim(db: asyncpg.Connect
 
     assert [r["text"] for r in rows] == _policy_bullets()
     assert documents == 7
+
+
+async def test_the_closed_pdf_case_was_resolved_in_august(db: asyncpg.Connection) -> None:
+    # R-01: so it never shows in "Done today" (P1 decision).
+    updated_at = await db.fetchval("SELECT updated_at FROM cases WHERE conversation_id = 5009")
+
+    assert (updated_at.year, updated_at.month) == (2026, 8)

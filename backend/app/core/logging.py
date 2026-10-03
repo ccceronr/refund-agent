@@ -12,12 +12,15 @@ from typing import TextIO
 import structlog
 from structlog.typing import Processor
 
+from app.core.masking import drop_personal_data
+
 LOG_LEVEL = logging.INFO
 HANDLER_NAME = "app-json"
 UVICORN_LOGGERS = ("uvicorn", "uvicorn.error", "uvicorn.access")
 
 _SHARED_PROCESSORS: list[Processor] = [
     structlog.contextvars.merge_contextvars,
+    drop_personal_data,  # R-33: before the timestamp, whose digits are not personal data
     structlog.stdlib.add_log_level,
     structlog.stdlib.add_logger_name,
     structlog.processors.TimeStamper(fmt="iso", utc=True),

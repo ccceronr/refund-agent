@@ -2,21 +2,22 @@
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Protocol
 
 import structlog
 from sqlalchemy import func, insert, select, update
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from app.agents.steps import StepRecord
 from app.db.models import AgentRun, AgentStep, Case
 from app.rules.model import ReasonCode
 from app.services import audit
-from app.services.errors import CaseAlreadyDecided, CaseNotFound, RunInProgress
+from app.services.errors import CaseAlreadyDecided, CaseNotFound, RunInProgress, RunLimitReached
 
 DECIDED_STATUSES = frozenset({"resolved", "auto_resolved"})
+ONE_HOUR = timedelta(hours=1)
 
 log = structlog.get_logger(__name__)
 
@@ -36,8 +37,9 @@ class RunStore(Protocol):
 
 
 class DbRunStore:
-    def __init__(self, engine: AsyncEngine) -> None:
+    def __init__(self, engine: AsyncEngine, max_runs_per_hour: int) -> None:
         self._engine = engine
+        self._max_runs_per_hour = max_runs_per_hour
 
     async def start(self, case_id: int, run_id: uuid.UUID, request_id: str | None) -> None:
         """One run per case at a time (design §4: 409 while running or once resolved)."""
@@ -51,6 +53,8 @@ class DbRunStore:
                 raise RunInProgress(f"case {case_id} is already being prepared")
             if status in DECIDED_STATUSES:
                 raise CaseAlreadyDecided(f"case {case_id} is {status}")
+            if await self._runs_in_the_last_hour(connection, case_id) >= self._max_runs_per_hour:
+                raise RunLimitReached(f"case {case_id}")  # LLM10: a cap on paid model calls
             await connection.execute(
                 update(Case)
                 .where(Case.conversation_id == case_id)
@@ -61,6 +65,15 @@ class DbRunStore:
                     id=run_id, case_id=case_id, status="running", request_id=request_id
                 )
             )
+
+    @staticmethod
+    async def _runs_in_the_last_hour(connection: AsyncConnection, case_id: int) -> int:
+        count = await connection.scalar(
+            select(func.count())
+            .select_from(AgentRun)
+            .where(AgentRun.case_id == case_id, AgentRun.started_at >= func.now() - ONE_HOUR)
+        )
+        return count or 0
 
     async def add_step(self, run_id: uuid.UUID, record: StepRecord) -> None:
         async with self._engine.begin() as connection:

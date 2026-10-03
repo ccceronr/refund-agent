@@ -14,6 +14,8 @@ from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from typing import Any
 
+import anthropic
+import httpx
 import structlog
 from sqlalchemy.ext.asyncio import AsyncEngine
 
@@ -78,11 +80,22 @@ class CaseRunner:
             if rw_engine is None
             else DbFinalizer(rw_engine, RefundService(self._thresholds))
         )
-        self.store: RunStore = MemoryRunStore() if rw_engine is None else DbRunStore(rw_engine)
+        self.store: RunStore = (
+            MemoryRunStore()
+            if rw_engine is None
+            else DbRunStore(rw_engine, settings.max_runs_per_case_per_hour)
+        )
 
     async def run(self, case_id: int, request_id: str | None = None) -> RunResult:
+        return await self.execute(case_id, await self.claim(case_id, request_id))
+
+    async def claim(self, case_id: int, request_id: str | None = None) -> uuid.UUID:
+        """Marks the case as running. Raises before any work starts (404, 409, 429)."""
         run_id = uuid.uuid4()
-        await self.store.start(case_id, run_id, request_id)  # RunInProgress / CaseAlreadyDecided
+        await self.store.start(case_id, run_id, request_id)
+        return run_id
+
+    async def execute(self, case_id: int, run_id: uuid.UUID) -> RunResult:
         tracker = StepTracker(run_id, self._events, self.store)
         deps = FlowDeps(
             self._settings,
@@ -157,6 +170,16 @@ class CaseRunner:
         await self._events.emit("completed", {"case_id": case_id, "status": outcome.case_status})
 
 
+def flow_models(
+    settings: Settings, http: httpx.AsyncClient, claude: anthropic.AsyncAnthropic
+) -> tuple[Decider, ReplyWriter]:
+    """The decider (Jev, Haiku fallback) and the writer, with FAULT_INJECTION applied."""
+    decider: Decider = build_decider(settings, http, claude)
+    if active_fault(settings) == "slow":
+        decider = SlowDecider(decider, settings.run_timeout_seconds + 1)
+    return decider, build_writer(settings, claude)
+
+
 class SlowDecider:
     """FAULT_INJECTION=slow: answers only after the run timeout, to demo TIMEOUT."""
 
@@ -176,15 +199,9 @@ async def _cli(case_id: int, dry_run: bool) -> dict[str, Any]:
     claude = anthropic_client(settings)
     try:
         async with jev_http_client(settings) as http:
-            decider: Decider = build_decider(settings, http, claude)
-            if active_fault(settings) == "slow":
-                decider = SlowDecider(decider, settings.run_timeout_seconds + 1)
+            decider, writer = flow_models(settings, http, claude)
             runner = CaseRunner(
-                settings=settings,
-                ro_engine=ro,
-                rw_engine=rw,
-                decider=decider,
-                writer=build_writer(settings, claude),
+                settings=settings, ro_engine=ro, rw_engine=rw, decider=decider, writer=writer
             )
             result = await runner.run(case_id)
     finally:

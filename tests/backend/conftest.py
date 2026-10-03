@@ -34,6 +34,9 @@ PRODUCTION_SECRETS: dict[str, Any] = {
     "session_secret": "s" * 48,
 }
 
+# Test-only passwords for the seeded staff users (design §4.0); never real ones.
+STAFF_PASSWORDS = {"luis": "luis-test-password-1", "marta": "marta-test-password-1"}
+
 Serve = Callable[..., AbstractAsyncContextManager[AsyncClient]]
 
 
@@ -114,6 +117,11 @@ ConnectAs = Callable[[str], AbstractAsyncContextManager[asyncpg.Connection]]
 
 
 @pytest.fixture
+def staff_passwords() -> dict[str, str]:
+    return dict(STAFF_PASSWORDS)
+
+
+@pytest.fixture
 def connect_as(admin_url: str, role_passwords: RolePasswords) -> ConnectAs:
     """Opens a raw connection to the test database as `app_rw` or `agent_ro`."""
     passwords = {"app_rw": role_passwords.app_rw, "agent_ro": role_passwords.agent_ro}
@@ -142,6 +150,8 @@ def database_env(admin_url: str, role_passwords: RolePasswords) -> dict[str, str
         "DATABASE_URL_RW": role_url(
             admin_url, "app_rw", role_passwords.app_rw, "postgresql+asyncpg"
         ),
+        "SEED_PASSWORD_LUIS": STAFF_PASSWORDS["luis"],
+        "SEED_PASSWORD_MARTA": STAFF_PASSWORDS["marta"],
     }
 
 

@@ -117,7 +117,7 @@ runs the P4 smoke test and the three dry runs together once the keys are in `.en
 ## P6 — API, decisions and refunds (~3 h)
 - Routers per design §4: `/health`, `/cases`, `/cases/{id}`, `/cases/{id}/run` (SSE +
   JSON), `/cases/{id}/decision`, `/auth/*` (design §4.0). Error handler → friendly JSON. slowapi limits
-  (client IP from `X-Forwarded-For`, design §11).
+  (client IP from `X-Real-IP` set by Railway's edge, design §11).
   Input validation (Pydantic, path ids positive ints, Idempotency-Key UUID).
 - `DecisionService` (BR-09, BR-12, idempotency, row lock), `RefundService` (BR-11),
   `AuditService` (R-35), feedback eval recording (R-23).

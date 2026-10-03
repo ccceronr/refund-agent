@@ -52,8 +52,11 @@ services:
     <<: *app
     environment:
       <<: *database-urls
-      # Least privilege: the long-running app never holds the superuser password.
+      # Least privilege: the long-running app never holds the superuser password, nor
+      # the staff passwords (only the seed in `migrate` hashes them).
       POSTGRES_PASSWORD: ""
+      SEED_PASSWORD_LUIS: ""
+      SEED_PASSWORD_MARTA: ""
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:

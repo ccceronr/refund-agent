@@ -8,6 +8,9 @@ from httpx import AsyncClient
 
 from app.core.config import Settings
 
+# Every change to /api needs it (design §4.0); without it the answer is 403 first.
+REQUESTED_WITH = {"X-Requested-With": "refund-app"}
+
 
 @pytest.mark.parametrize("accept", ["application/json", "text/html,application/xhtml+xml"])
 async def test_unknown_api_path_returns_the_json_404(client: AsyncClient, accept: str) -> None:
@@ -20,14 +23,14 @@ async def test_unknown_api_path_returns_the_json_404(client: AsyncClient, accept
 
 
 async def test_unknown_api_path_with_post_returns_the_json_404(client: AsyncClient) -> None:
-    response = await client.post("/api/cases/1/nothing-here", json={})
+    response = await client.post("/api/cases/1/nothing-here", json={}, headers=REQUESTED_WITH)
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "not_found"
 
 
 async def test_wrong_method_on_a_known_api_path_is_405_not_404(client: AsyncClient) -> None:
-    response = await client.post("/api/health", json={})
+    response = await client.post("/api/health", json={}, headers=REQUESTED_WITH)
 
     assert response.status_code == 405
     assert response.json()["error"]["code"] == "method_not_allowed"

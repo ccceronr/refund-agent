@@ -39,9 +39,12 @@ def mount_frontend(app: FastAPI, static_dir: Path) -> None:
     app.include_router(router)
 
 
+def is_api_path(path: str) -> bool:
+    return path == API_PREFIX or path.startswith(f"{API_PREFIX}/")
+
+
 async def _reject_api_paths(request: Request) -> None:
-    path = request.url.path
-    if path == API_PREFIX or path.startswith(f"{API_PREFIX}/"):
+    if is_api_path(request.url.path):
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
 
 
