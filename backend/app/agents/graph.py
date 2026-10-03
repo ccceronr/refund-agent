@@ -113,7 +113,7 @@ class Flow:
         async with self._d.tracker.step("screen", "decision", "jev") as step:
             try:
                 decisions = await self._d.decider.decide(
-                    self._member_text(case), screening_questions()
+                    self._screening_text(case), screening_questions()
                 )
             except ModelUnavailable:
                 step.fail(ReasonCode.AI_UNAVAILABLE.value)
@@ -345,6 +345,12 @@ class Flow:
         # One connection per query, so the evidence tools really run in parallel.
         async with self._d.ro_engine.connect() as connection:
             return await query(connection)
+
+    def _screening_text(self, case: CaseContext) -> str:
+        """The subject Luis also sees, then the member's messages (design §6.1, §8; R-41)."""
+        messages = "\n".join(f"Member: {m.body}" for m in case.member_messages)
+        text = f"Subject: {case.subject}\n{messages}"
+        return text[: self._d.settings.max_message_chars_for_models]
 
     def _member_text(self, case: CaseContext) -> str:
         """The member's messages only, oldest first, truncated for the models (R-41, design §8)."""

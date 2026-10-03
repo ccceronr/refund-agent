@@ -42,9 +42,11 @@ class ScriptedDecider:
         self.source = source
         self.down = down
         self.asked: list[frozenset[str]] = []
+        self.states: list[State] = []
 
     async def decide(self, state: State, questions: Mapping[str, Question]) -> Decisions:
         self.asked.append(frozenset(questions))
+        self.states.append(state)
         if self.down:
             raise ModelUnavailable("jev", "http_529")
         s = self.script
@@ -137,6 +139,17 @@ async def test_suspected_injection_stops_before_reading_any_account(run: Run) ->
     )
     assert step_names(runner) == ["load_case", "screen", "finalize"]
     assert plan.draft_source == "template"  # the neutral manual reply, no promises
+
+
+async def test_screening_reads_the_subject_and_the_member_messages_only(run: Run) -> None:
+    # design §6.1/§8: the subject Luis also sees, then the member's messages; no names or IDs.
+    decider = ScriptedDecider()
+
+    await run(5012, decider=decider)
+
+    assert decider.states[0] == (
+        "Subject: Overdraft fee\nMember: My paycheck came the same day. Can you refund this?"
+    )
 
 
 async def test_another_kind_of_request_is_not_a_refund(run: Run) -> None:

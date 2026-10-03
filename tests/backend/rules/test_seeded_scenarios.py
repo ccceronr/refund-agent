@@ -84,6 +84,8 @@ async def _rule_input(
     ("conversation_id", "fee_date", "recommendation", "reason", "tier"),
     [
         (5012, None, R, ReasonCode.ELIGIBLE, Tier.STAFF),
+        # The flow stops earlier at INTENT_UNCLEAR (a question, not a refund request);
+        # the seed and the rules still agree on the fee itself.
         (5008, None, M, ReasonCode.FEE_TYPE_NOT_COVERED, Tier.MANUAL),
         (5013, None, R, ReasonCode.ELIGIBLE, Tier.AUTO),
         (5014, None, R, ReasonCode.ELIGIBLE, Tier.AUTO),
