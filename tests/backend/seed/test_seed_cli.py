@@ -6,6 +6,8 @@ Runs the real CLI as a subprocess against the test database (seed-and-evals §1,
 import asyncpg
 import pytest
 
+from app.core.passwords import verify_password
+
 PRODUCTION_ENV = {
     "APP_ENV": "production",
     "DATABASE_URL_RO": "postgresql+asyncpg://agent_ro:unused@127.0.0.1:1/refunds",
@@ -95,3 +97,45 @@ async def test_new_rows_get_ids_after_the_seeded_ones(db: asyncpg.Connection) ->
 
     assert message_id > await db.fetchval("SELECT max(id) FROM messages")
     assert transaction_id > await db.fetchval("SELECT max(id) FROM transactions")
+
+
+async def test_staff_passwords_are_stored_only_as_argon2id_hashes(
+    db: asyncpg.Connection, staff_passwords: dict[str, str]
+) -> None:
+    hashes = dict(await db.fetch("SELECT username, password_hash FROM staff"))
+
+    assert hashes[None] is None  # S00, the automatic flow, cannot sign in
+    for username, password in staff_passwords.items():
+        assert hashes[username].startswith("$argon2id$")
+        assert password not in hashes[username]
+        assert verify_password(hashes[username], password)
+
+
+async def test_a_redeploy_updates_the_staff_passwords(
+    seeded_db: dict[str, str], db: asyncpg.Connection, backend_cli
+) -> None:
+    try:
+        result = backend_cli(
+            {**seeded_db, "SEED_PASSWORD_LUIS": "rotated-password-2"},
+            "-m",
+            "seed.seed",
+            "--if-empty",
+        )
+
+        assert result.returncode == 0, result.stderr
+        stored = await db.fetchval("SELECT password_hash FROM staff WHERE username = 'luis'")
+        assert verify_password(stored, "rotated-password-2")
+    finally:
+        backend_cli(seeded_db, "-m", "seed.seed", "--reset")
+
+
+def test_production_refuses_to_seed_without_staff_passwords(
+    seeded_db: dict[str, str], backend_cli
+) -> None:
+    # OWASP A02: no default or missing passwords in production.
+    without_passwords = {k: v for k, v in seeded_db.items() if not k.startswith("SEED_PASSWORD")}
+
+    result = backend_cli({**without_passwords, **PRODUCTION_ENV}, "-m", "seed.seed", "--if-empty")
+
+    assert result.returncode != 0
+    assert "SEED_PASSWORD_LUIS" in (result.stderr + result.stdout)

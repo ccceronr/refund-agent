@@ -15,7 +15,8 @@ from starlette.datastructures import Headers, MutableHeaders
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from app.api.errors import INTERNAL_ERROR, PAYLOAD_TOO_LARGE, error_response
+from app.api.errors import INTERNAL_ERROR, PAYLOAD_TOO_LARGE, REQUEST_BLOCKED, error_response
+from app.api.frontend import is_api_path
 from app.core.logging import error_trace
 
 REQUEST_ID_HEADER = "x-request-id"
@@ -199,3 +200,34 @@ def _declared_length(scope: Scope) -> int:
 async def _payload_too_large(scope: Scope, receive: Receive, send: Send) -> None:
     response = error_response(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, *PAYLOAD_TOO_LARGE)
     await response(scope, receive, send)
+
+
+REQUESTED_WITH_HEADER = "x-requested-with"
+REQUESTED_WITH_VALUE = "refund-app"
+SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+
+
+class RequireRequestedWithMiddleware:
+    """CSRF guard (design §4.0): every change to /api must send X-Requested-With: refund-app.
+
+    A cross-site form or link can't set custom headers, and the SameSite=Strict cookie
+    never leaves the site, so a forged request fails one way or the other.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if self._is_unguarded_change(scope):
+            response = error_response(HTTPStatus.FORBIDDEN, *REQUEST_BLOCKED)
+            await response(scope, receive, send)
+            return
+        await self.app(scope, receive, send)
+
+    @staticmethod
+    def _is_unguarded_change(scope: Scope) -> bool:
+        if scope["type"] != "http" or scope["method"] in SAFE_METHODS:
+            return False
+        if not is_api_path(scope["path"]):
+            return False
+        return Headers(scope=scope).get(REQUESTED_WITH_HEADER) != REQUESTED_WITH_VALUE

@@ -69,3 +69,17 @@ def test_a_cli_can_send_its_logs_to_stderr_and_keep_stdout_for_its_report(
 
     assert "case_prepared" in captured.err
     assert captured.out == ""
+
+
+def test_logs_never_carry_message_bodies_or_account_numbers(log_output: io.StringIO) -> None:
+    # R-33, design §8: risky keys are dropped and long digit runs are redacted.
+    structlog.get_logger("app.test").info(
+        "reply_sent", body="Hi Ana", account_number="884210", note="paid from 884210", case_id=5012
+    )
+
+    line = _last_line(log_output)
+    assert "body" not in line
+    assert "account_number" not in line
+    assert line["note"] == "paid from ••"
+    assert line["case_id"] == 5012
+    assert "884210" not in log_output.getvalue()

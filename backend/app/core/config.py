@@ -60,8 +60,12 @@ class Settings(BaseSettings):
     auto_max_injection: Probability = 0.1
 
     session_secret: SecretStr | None = None
+    session_max_age_seconds: Annotated[int, Field(ge=60)] = 8 * 60 * 60  # design §4.0: 8 h
+    login_max_failures: Annotated[int, Field(ge=1)] = 5
+    login_lockout_seconds: Annotated[int, Field(ge=1)] = 15 * 60
 
     max_runs_per_case_per_hour: Annotated[int, Field(ge=1)] = 5
+    queue_done_window_hours: Annotated[int, Field(ge=1)] = 24  # R-01: "resolved in the last 24 h"
     max_message_chars_for_models: Annotated[int, Field(ge=1)] = 2000
     rate_limit_default: str = "60/minute"
     rate_limit_run: str = "10/minute"

@@ -17,11 +17,14 @@ from pathlib import Path
 from typing import Any
 
 import structlog
-from sqlalchemy import Table, func, insert, select, text
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import Table, func, insert, select, text, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.core.config import Settings
 from app.core.logging import configure_logging
+from app.core.passwords import hash_password
 from app.db.engines import create_rw_engine
 from app.db.models import (
     Account,
@@ -65,7 +68,7 @@ CREDIT_UNIONS: list[dict[str, Any]] = [
     {"id": 7, "name": "Riverbend Credit Union"},
     {"id": 9, "name": "Lakeside Community Credit Union"},
 ]
-# Password hashes for luis and marta arrive with authentication (P6).
+# Password hashes for luis and marta come from the environment (design §4.0).
 STAFF: list[dict[str, Any]] = [
     {"id": "S00", "first_name": "Automatic refunds", "role": "system", "username": None},
     {"id": "S02", "first_name": "Marta", "role": "supervisor", "username": "marta"},
@@ -86,16 +89,48 @@ class SeedRefused(RuntimeError):
     pass
 
 
-async def run_seed(settings: Settings, *, reset: bool) -> None:
+class StaffPasswords(BaseSettings):
+    """Sign-in passwords for the seeded staff users, read only by the seed (design §4.0)."""
+
+    model_config = SettingsConfigDict(env_ignore_empty=True, hide_input_in_errors=True)
+
+    seed_password_luis: SecretStr | None = None
+    seed_password_marta: SecretStr | None = None
+
+    def by_username(self) -> dict[str, SecretStr | None]:
+        return {"luis": self.seed_password_luis, "marta": self.seed_password_marta}
+
+
+async def run_seed(settings: Settings, passwords: StaffPasswords, *, reset: bool) -> None:
     if reset and settings.is_production:
         # OWASP A08: a redeploy or a typo must never wipe production decisions.
         raise SeedRefused("--reset is refused when APP_ENV=production")
+    missing = [
+        f"SEED_PASSWORD_{name.upper()}" for name, v in passwords.by_username().items() if not v
+    ]
+    if missing and settings.is_production:
+        # OWASP A02: no default or missing passwords in production.
+        raise SeedRefused(f"{', '.join(missing)} must be set in production")
     engine = create_rw_engine(settings)
     try:
         async with engine.begin() as connection:
             await _seed(connection, reset=reset)
+            await _set_staff_passwords(connection, passwords)
     finally:
         await engine.dispose()
+
+
+async def _set_staff_passwords(connection: AsyncConnection, passwords: StaffPasswords) -> None:
+    # Runs on every deploy (also with --if-empty), so changing a variable rotates a password.
+    for username, password in passwords.by_username().items():
+        if password is None:
+            log.warning("staff_sign_in_disabled", username=username)
+            continue
+        await connection.execute(
+            update(Staff)
+            .where(Staff.username == username)
+            .values(password_hash=hash_password(password.get_secret_value()))
+        )
 
 
 async def _seed(connection: AsyncConnection, *, reset: bool) -> None:
@@ -149,7 +184,8 @@ def _all_rows() -> dict[str, list[dict[str, Any]]]:
     next_transaction_id = _add_tom_savings_fee(rows, FIRST_TRANSACTION_ID)
     for index, scenario in enumerate(SCENARIOS):
         next_transaction_id = _add_scenario(rows, index, scenario, next_transaction_id)
-    rows["cases"] = [_case_for(conversation) for conversation in rows["conversations"]]
+    seeded_at = datetime.now(UTC)
+    rows["cases"] = [_case_for(conversation, seeded_at) for conversation in rows["conversations"]]
     return rows
 
 
@@ -236,13 +272,16 @@ def _add_transactions(
     return next_id + len(ledger)
 
 
-def _case_for(conversation: dict[str, Any]) -> dict[str, Any]:
+def _case_for(conversation: dict[str, Any], seeded_at: datetime) -> dict[str, Any]:
+    # Every row has the same keys: a multi-row INSERT takes its columns from the first row
+    # and would silently drop the others' extra values.
     if conversation["id"] == CLOSED_PDF_CONVERSATION_ID:
         # Closed in August: resolved, and old enough to stay out of "Done today" (R-01).
         closed_at = conversation["created_at"].replace(tzinfo=UTC)
         return {"conversation_id": conversation["id"], "status": "resolved", "category": "other",
                 "created_at": closed_at, "updated_at": closed_at}  # fmt: skip
-    return {"conversation_id": conversation["id"], "status": "new", "category": "unknown"}
+    return {"conversation_id": conversation["id"], "status": "new", "category": "unknown",
+            "created_at": seeded_at, "updated_at": seeded_at}  # fmt: skip
 
 
 def _midnight_utc(day: Any) -> datetime:
@@ -298,7 +337,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     configure_logging()
     try:
-        asyncio.run(run_seed(Settings(), reset=args.reset))
+        asyncio.run(run_seed(Settings(), StaffPasswords(), reset=args.reset))
     except SeedRefused as refused:
         log.error("seed_refused", reason=str(refused))
         return 2

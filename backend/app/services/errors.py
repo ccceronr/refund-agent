@@ -27,3 +27,23 @@ class ApprovalNotAllowed(PermissionError):
 
 class NoFeeIdentified(ValueError):
     """BR-09 "Manual cases": a refund needs an identified fee (422)."""
+
+
+class InvalidDecision(ValueError):
+    """A decision that doesn't fit the case (design §4.3). `message` is shown to Luis (422)."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = message
+
+
+class RunLimitReached(RuntimeError):
+    """LLM10: the case was prepared too many times in the last hour (429)."""
+
+
+class WrongCredentials(PermissionError):
+    """Wrong username or password; never says which (OWASP A07)."""
+
+
+class TooManyAttempts(PermissionError):
+    """Too many failed sign-ins for this username (design §4.0)."""
