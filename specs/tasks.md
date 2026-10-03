@@ -96,6 +96,8 @@ Jev returns 529 three times (mock transport); guard catches wrong amount, banned
 long digit run; templates exist for every outcome × language. Unit tests never call real
 APIs.
 **Covers:** R-04 (client), R-11, R-12, R-18, R-19, R-33. **→ STOP**
+**Pending (2026-10-03):** `make smoke-models` not run yet (no API keys). It runs together
+with the P5 real runs in one command once the keys are in `.env` (see the P5 report).
 
 ## P5 — Agent graph (~3 h)
 - LangGraph graph per design §5 with conditional edges, parallel evidence gathering,

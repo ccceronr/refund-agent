@@ -8,7 +8,7 @@ APP_URL ?= http://localhost:8000
 # Backend tests use their own database (refunds_test) on the compose Postgres,
 # reached on the host port from .env (DB_HOST_PORT).
 
-.PHONY: help install hooks up down reset-db check lint typecheck test test-backend test-frontend fmt health evals
+.PHONY: help install hooks up down reset-db smoke-models check lint typecheck test test-backend test-frontend fmt health evals
 
 help: ## List the commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -28,6 +28,9 @@ down: ## Stop everything (keeps the database volume)
 
 reset-db: ## Wipe the local data and reload the demo seed (refused in production)
 	docker compose run --rm migrate python -m seed.seed --reset
+
+smoke-models: ## One tiny real call to Jev, Haiku and Sonnet (paid, well under $0.05)
+	docker compose run --rm --build app python -m app.agents.smoke
 
 check: lint typecheck test ## Everything CI runs, except the audits and the image build
 

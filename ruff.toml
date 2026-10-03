@@ -33,6 +33,15 @@ ignore = ["N818"]
 "tests/backend/rules/*.py" = ["E501"]
 # UI copy: one sentence per line, so every text Luis sees can be found with grep.
 "backend/app/rules/texts.py" = ["E501"]
+"backend/app/agents/writer.py" = ["E501"]
+"backend/app/agents/questions.py" = ["E501"]
+"backend/app/agents/smoke.py" = ["E501"]
+"backend/app/agents/templates.py" = ["E501"]
+"tests/backend/agents/*.py" = ["E501"]
+
+[lint.pylint]
+# Keyword-only parameters (`*, a, b`) read fine; six keeps signatures explicit.
+max-args = 6
 
 [lint.isort]
 known-first-party = ["app"]

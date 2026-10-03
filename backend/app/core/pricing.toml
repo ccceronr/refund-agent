@@ -1,0 +1,42 @@
+# USD per million tokens (design §9). Checked 2026-10-03 against the official pages:
+#   Claude: https://platform.claude.com/docs/en/about-claude/pricing
+#   Jev:    https://docs.typesafe.ai/models  (input tokens only; output is free)
+# cache_write is the 5-minute TTL rate (the writer uses the default TTL).
+# Keys are the model names the APIs report back in their responses.
+
+[models."claude-sonnet-5-5"]
+input = "2.00"
+output = "10.00"
+cache_read = "0.20"
+cache_write = "2.50"
+
+# Server-side refusal fallback for the writer may answer with Claude Sonnet 5.
+[models."claude-sonnet-5"]
+input = "2.00"
+output = "10.00"
+cache_read = "0.20"
+cache_write = "2.50"
+
+[models."claude-haiku-4-5-20251001"]
+input = "1.00"
+output = "5.00"
+cache_read = "0.10"
+cache_write = "1.25"
+
+[models."claude-haiku-4-5"]
+input = "1.00"
+output = "5.00"
+cache_read = "0.10"
+cache_write = "1.25"
+
+[models."jev-1.13.0"]
+input = "0.042"
+output = "0"
+cache_read = "0"
+cache_write = "0"
+
+[models."jev-latest"]
+input = "0.042"
+output = "0"
+cache_read = "0"
+cache_write = "0"
