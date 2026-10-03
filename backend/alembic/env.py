@@ -9,9 +9,9 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.core.config import Settings
 from app.core.logging import configure_logging
+from app.db.models import Base
 
-# The SQLAlchemy models (and their metadata) arrive in P1 with the first migration.
-target_metadata = None
+target_metadata = Base.metadata
 
 
 def _run_migrations(connection: Connection) -> None:

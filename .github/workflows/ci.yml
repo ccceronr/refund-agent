@@ -61,7 +61,7 @@ jobs:
           DATABASE_URL_RW: postgresql+asyncpg://app_rw:ci-app-rw@localhost:5432/refunds
         run: |
           uv run --project backend python -m app.db.bootstrap_roles
-          cd backend && uv run alembic upgrade head
+          cd backend && uv run alembic upgrade head && uv run python -m seed.seed --if-empty
       - name: pip-audit (reports, does not block)
         continue-on-error: true
         run: uv run --project backend pip-audit --skip-editable --progress-spinner off

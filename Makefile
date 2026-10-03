@@ -8,7 +8,7 @@ APP_URL ?= http://localhost:8000
 # Backend tests use their own database (refunds_test) on the compose Postgres,
 # reached on the host port from .env (DB_HOST_PORT).
 
-.PHONY: help install hooks up down check lint typecheck test test-backend test-frontend fmt health evals
+.PHONY: help install hooks up down reset-db check lint typecheck test test-backend test-frontend fmt health evals
 
 help: ## List the commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -25,6 +25,9 @@ up: ## Start db, migrations and the app (http://localhost:8000)
 
 down: ## Stop everything (keeps the database volume)
 	docker compose down
+
+reset-db: ## Wipe the local data and reload the demo seed (refused in production)
+	docker compose run --rm migrate python -m seed.seed --reset
 
 check: lint typecheck test ## Everything CI runs, except the audits and the image build
 
