@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+/* Brand tokens (ui.md §1). Typography and the grey scale arrive with the UI (P7). */
+@theme {
+  --color-navy: #001d3d;
+  --color-clay: #efeeed;
+  --color-terracotta: #dc634b;
+  --color-white: #ffffff;
+  --color-success: #2f7d5b;
+  --color-error: #b42318;
+  --color-warning: #b26b00;
+}
+
+body {
+  @apply bg-clay text-navy antialiased;
+}

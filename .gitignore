@@ -1,0 +1,27 @@
+# Secrets live only in the environment (R-32)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+frontend/dist/
+coverage/
+
+# Built frontend, copied into the image by the Docker build (design §1 "Serving")
+backend/app/static/
+
+# OS / editors
+.DS_Store
+.idea/
+
+# The test statement stays out of the repo
+specs/src/AI-Developer-Technical-Test.pdf
