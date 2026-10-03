@@ -224,12 +224,19 @@ there only.
 { "action": "approve" | "edit" | "reject",
   "outcome": "refund" | "no_refund",      // required for edit, ignored otherwise
   "reply_text": "string, 1..2000 chars",  // required for edit; ignored for approve/reject
-  "reason": "string, 1..500 chars" }      // required for reject; optional for edit
+  "reason": "string, 1..500 chars",       // required for reject; optional for edit
+  "fee_transaction_id": 123 }             // optional; only edit + refund on an AMBIGUOUS_FEE case
 ```
 - **approve**: executes the current proposal as-is (refund if `REFUND`) and sends the draft.
   Requires a proposal with recommendation ≠ `MANUAL`.
 - **edit**: staff sets the outcome and the reply. Works with or without a proposal (manual
   cases). Records a feedback eval if a proposal existed and outcome or reply changed.
+  Manual cases (BR-09 "Manual cases"): with reason `AMBIGUOUS_FEE`, `outcome=refund`
+  requires `fee_transaction_id`, which must be one of the candidates stored in the
+  proposal's `evidence.fee_candidates` (else 422); `evaluate()` runs again with that fee
+  and BR-09 applies to the result. Any other manual case with `outcome=refund` → 422
+  "No fee was identified for this case, so it can't be refunded here."
+  `fee_transaction_id` sent in any other situation → 422.
 - **reject**: executes nothing, sends nothing. Case → `manual_review` (`REJECTED_BY_STAFF`),
   feedback eval recorded. Staff can then submit an `edit` (new idempotency key).
 - Authority BR-09 → 403. Already decided with another key → 409. Same key → original

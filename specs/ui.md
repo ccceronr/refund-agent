@@ -95,7 +95,9 @@ Quoted, with send time. Full thread if more than one message.
   small note "Written from a standard template."
 - Editing the text switches the primary action to **"Send edited reply"** (action `edit`).
 - For manual cases: an outcome selector ("Refund $35.00" / "Don't refund") above an empty
-  or template reply; action `edit`.
+  or template reply; action `edit`. For `AMBIGUOUS_FEE`, Luis first picks the fee from the
+  ones shown, by date and amount ("Overdraft fee · Mon, Sep 8 · $35.00"), never by ID. Other
+  manual cases offer "Don't refund" only (BR-09 "Manual cases").
 
 ### 2.7 Actions (sticky bottom bar)
 - Primary (navy): **Approve and send** · **Send edited reply** · (supervisor needed and

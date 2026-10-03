@@ -23,12 +23,16 @@ select = [
 ignore = ["N818"]
 
 [lint.per-file-ignores]
-"tests/**" = ["S101", "S105", "S106", "PLR2004"]
+# Table-driven tests take one argument per column.
+"tests/**" = ["S101", "S105", "S106", "PLR2004", "PLR0913", "PLR0917"]
 # Verbatim data tables (PDF rows, scenarios, their expectations): one row per line so
 # they can be checked against the specs line by line.
 "backend/seed/pdf_rows.py" = ["E501"]
 "backend/seed/scenarios.py" = ["E501"]
 "tests/backend/seed/test_seed_data.py" = ["E501"]
+"tests/backend/rules/*.py" = ["E501"]
+# UI copy: one sentence per line, so every text Luis sees can be found with grep.
+"backend/app/rules/texts.py" = ["E501"]
 
 [lint.isort]
 known-first-party = ["app"]

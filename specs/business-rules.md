@@ -139,6 +139,18 @@ Who may **execute** a refund through `POST /cases/{id}/decision`:
 | Refund overriding `NO_REFUND` with reason `LIMIT_REACHED`, `OUT_OF_WINDOW`, `NOT_GOOD_STANDING` or `NO_QUALIFYING_REASON` (policy exception) | ❌ | ✅ |
 | Refund of a `FEE_TYPE_NOT_COVERED` fee, amount ≤ limit (staff discretion) | ✅ | ✅ |
 | `ALREADY_REFUNDED` | ❌ | ❌ |
+| Manual case with reason `AMBIGUOUS_FEE`: the staff member picks the fee | Same matrix, applied to a fresh `evaluate()` with the picked fee | same |
+| Any other manual case (no fee identified) | ❌ reply only | ❌ reply only |
+
+**Manual cases.** Only `AMBIGUOUS_FEE` allows a refund decision: the request names the
+fee (`fee_transaction_id`), which must be one of the fee candidates stored in the case
+evidence (otherwise 422). `evaluate()` (BR-01…BR-07) runs again with that fee and the
+rows above apply to the new result. No new rules. In every other manual case
+(`NO_FEE_FOUND`, `INJECTION_SUSPECTED`, `INTENT_UNCLEAR`, `AI_UNAVAILABLE`, `TIMEOUT`,
+`DATA_UNAVAILABLE`, `REJECTED_BY_STAFF` without an identified fee) the decision can only
+send a reply; a refund request returns 422 "No fee was identified for this case, so it
+can't be refunded here." (`FEE_TYPE_NOT_COVERED` has an identified fee and follows the
+matrix above.)
 
 Sending a reply **without** a refund never needs a supervisor.
 A refused attempt returns 403 with a plain message, e.g.
