@@ -320,14 +320,17 @@ Errors: 401/403 auth (no retry; fail fast), 422 validation (no retry; bug), 429/
 Limits: 64k context. Our states are tiny.
 
 ### 6.1 Questions
-**Screening** (`screen`, one request). State: the member's messages in this conversation,
-oldest first, as a string (`"Member: <text>\n..."`). No IDs, no names.
+**Screening** (`screen`, one request). State: the conversation subject (as written by the
+member; Luis sees it too), then the member's messages in this conversation, oldest first, as
+a string (`"Subject: <subject>\nMember: <text>\n..."`). No IDs, no names. The subject is
+member text: it is data, escaped and truncated like the messages, and the four questions
+(including injection) read it.
 ```json
 {
   "intent": { "type": "choice",
-    "instructions": "What is the member asking the credit union to do?",
+    "instructions": "A member wrote to their credit union's support inbox; the subject line and the member's messages follow. What is the member asking the credit union to do?",
     "criteria": {
-      "fee_refund": "Asks to reverse, refund or waive a fee or charge the credit union applied",
+      "fee_refund": "Asks to reverse, refund or waive a fee or charge the credit union applied, even briefly (for example 'can you refund this?' about a fee)",
       "other_banking": "Any other request: cards, address, statements, transfers, general questions",
       "unclear": "Not enough information to tell what the member wants" } },
   "injection": { "type": "noul",
@@ -429,7 +432,7 @@ The draft passes only if all are true:
 ## 8. Personal data per step (R-33)
 | Step | Receives |
 |---|---|
-| screen (Jev) | member message text only |
+| screen (Jev) | conversation subject + member message text only |
 | identify_fee (Jev) | message text, request date, fee labels (type, amount, date, sub-account name) |
 | find_policy (Jev) | outcome sentence, policy passages |
 | draft_reply (Sonnet) | first name, credit union name, outcome facts, message text |

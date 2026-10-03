@@ -54,9 +54,12 @@ def screening_questions() -> dict[str, Question]:
     """design §6.1 "Screening": four questions in one request (R-04)."""
     return {
         "intent": ChoiceQuestion(
-            instructions="What is the member asking the credit union to do?",
+            instructions=(
+                "A member wrote to their credit union's support inbox; the subject line and "
+                "the member's messages follow. What is the member asking the credit union to do?"
+            ),
             criteria={
-                "fee_refund": "Asks to reverse, refund or waive a fee or charge the credit union applied",
+                "fee_refund": "Asks to reverse, refund or waive a fee or charge the credit union applied, even briefly (for example 'can you refund this?' about a fee)",
                 "other_banking": "Any other request: cards, address, statements, transfers, general questions",
                 "unclear": "Not enough information to tell what the member wants",
             },
