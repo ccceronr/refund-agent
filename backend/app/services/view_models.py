@@ -47,6 +47,19 @@ class CheckView(View):
 class PolicyQuoteView(View):
     document: str
     text: str
+    slug: str  # for the side sheet with the whole document
+    passage_id: int  # which passage to highlight there (never shown)
+
+
+class PassageView(View):
+    id: int
+    text: str
+
+
+class PolicyDocumentView(View):
+    slug: str
+    title: str
+    passages: list[PassageView]
 
 
 class FeeChoiceView(View):
@@ -76,6 +89,7 @@ class FeeView(View):
     label: str
     amount: str
     date: date
+    sub_account: str
     account: str
     account_number_full: str | None  # R-33: the only place the full number appears
 

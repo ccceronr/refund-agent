@@ -221,7 +221,12 @@ def _proposal_view(
         ),
         amount=_money_text(proposal.amount),
         checks=[CheckView(**check) for check in (proposal.checks or {}).get("items", [])],
-        policy_quote=PolicyQuoteView(document=quote["document_title"], text=quote["text"])
+        policy_quote=PolicyQuoteView(
+            document=quote["document_title"],
+            text=quote["text"],
+            slug=quote["document_slug"],
+            passage_id=quote["passage_id"],
+        )
         if quote
         else None,
         draft_reply=proposal.draft_reply,
@@ -277,6 +282,7 @@ def _fee_view(fee: dict[str, Any]) -> FeeView:
         label=labels.fee_label(fee["description"]),
         amount=fee["amount"],
         date=fee["date"],
+        sub_account=fee["sub_account_name"],
         account=account,
         account_number_full=number,
     )

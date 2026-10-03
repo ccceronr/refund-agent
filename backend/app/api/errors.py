@@ -21,6 +21,7 @@ from app.services.errors import (
     FeeAlreadyRefunded,
     InvalidDecision,
     NoFeeIdentified,
+    PolicyNotFound,
     RunInProgress,
     RunLimitReached,
     TooManyAttempts,
@@ -55,6 +56,7 @@ _DOMAIN_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
         "Too many requests. Please wait a moment and try again.",
     ),
     CaseNotFound: (HTTPStatus.NOT_FOUND, "case_not_found", "We couldn't find that case."),
+    PolicyNotFound: (HTTPStatus.NOT_FOUND, "policy_not_found", "We couldn't find that policy."),
     RunInProgress: (
         HTTPStatus.CONFLICT,
         "run_in_progress",

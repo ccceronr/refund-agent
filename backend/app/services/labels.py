@@ -30,7 +30,12 @@ def status_label(status: str) -> str:
 
 def fee_label(description: str) -> str:
     """ "Fee Withdrawal ; Courtesy Pay fee" → "Overdraft fee"."""
-    return plain_name(fee_type(description)).capitalize()
+    return _sentence_case(plain_name(fee_type(description)))
+
+
+def _sentence_case(text: str) -> str:
+    # Not str.capitalize(): it would lower-case the rest ("ATM" → "atm").
+    return text[:1].upper() + text[1:]
 
 
 def topic(category: str, fee_description: str | None, subject: str) -> str:
