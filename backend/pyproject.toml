@@ -36,7 +36,7 @@ dev = [
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["app"]
+files = ["app", "seed"]
 plugins = ["pydantic.mypy"]
 
 [tool.pydantic-mypy]

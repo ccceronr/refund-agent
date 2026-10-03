@@ -178,6 +178,8 @@ Send you any failing build/deploy log (paste the log, never secrets).
   walkthrough (the P7 path), architecture summary + links to diagrams, decisions and
   trade-offs (tiered autonomy, rules over LLM, Jev usage, read-only agents, FTS over
   vectors), how to run tests and evals, eval results, what I'd do next.
+  Known limitations to state: the seed has no original fee rows for prior refunds (like the
+  PDF); with full history, `identify_fee` should prefer fees that are not yet refunded.
 - `docs/diagrams/system-design.md`: Mermaid, one simple diagram: browser → Railway
   (`app`: FastAPI serving the API and the SPA; Postgres) → Anthropic/TypeSafe, GitHub
   Actions; plus the "at scale" note (design §1). Export PNG too.

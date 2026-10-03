@@ -38,7 +38,11 @@ services:
       <<: *database-urls
       # The admin URL is given to this one-shot service only (design §3.3).
       DATABASE_ADMIN_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/refunds
-    command: ["sh", "-c", "python -m app.db.bootstrap_roles && alembic upgrade head"]
+    # Roles, schema, then demo data only if the database is still empty (safe to re-run).
+    command:
+      - sh
+      - -c
+      - python -m app.db.bootstrap_roles && alembic upgrade head && python -m seed.seed --if-empty
     depends_on:
       db:
         condition: service_healthy

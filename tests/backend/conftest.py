@@ -7,6 +7,8 @@ Needs a Postgres superuser URL for a database used only by tests
 
 import asyncio
 import os
+import subprocess
+import sys
 from collections.abc import AsyncIterator, Callable
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from pathlib import Path
@@ -111,12 +113,63 @@ def connect_as(admin_url: str, role_passwords: RolePasswords) -> ConnectAs:
     return _connect
 
 
+BACKEND_DIR = Path(__file__).resolve().parents[2] / "backend"
+
+
+@pytest.fixture(scope="session")
+def database_env(admin_url: str, role_passwords: RolePasswords) -> dict[str, str]:
+    """Environment for the real CLI entry points (alembic, seed) against the test DB."""
+    return {
+        "PATH": os.environ["PATH"],
+        "HOME": os.environ.get("HOME", ""),
+        "APP_ENV": "local",
+        "DATABASE_URL_RW": role_url(
+            admin_url, "app_rw", role_passwords.app_rw, "postgresql+asyncpg"
+        ),
+    }
+
+
+BackendCli = Callable[..., subprocess.CompletedProcess[str]]
+
+
+def _run_backend_cli(env: dict[str, str], *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(  # noqa: S603 - fixed argv, test-only
+        [sys.executable, *args],
+        cwd=BACKEND_DIR,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+@pytest.fixture
+def backend_cli() -> BackendCli:
+    """Runs `python <args>` in backend/ with the given environment (alembic, seed)."""
+    return _run_backend_cli
+
+
+@pytest.fixture(scope="session")
+def seeded_db(database_env: dict[str, str]) -> dict[str, str]:
+    """refunds_test migrated to head and freshly seeded, once per test session."""
+    for args in (("-m", "alembic", "upgrade", "head"), ("-m", "seed.seed", "--reset")):
+        result = _run_backend_cli(database_env, *args)
+        assert result.returncode == 0, result.stderr or result.stdout
+    return database_env
+
+
 @pytest.fixture
 def make_settings(admin_url: str, role_passwords: RolePasswords) -> Callable[..., Settings]:
     rw_url = role_url(admin_url, "app_rw", role_passwords.app_rw, "postgresql+asyncpg")
+    ro_url = role_url(admin_url, "agent_ro", role_passwords.agent_ro, "postgresql+asyncpg")
 
     def factory(**overrides: Any) -> Settings:
-        values: dict[str, Any] = {"app_env": "local", "database_url_rw": rw_url, **overrides}
+        values: dict[str, Any] = {
+            "app_env": "local",
+            "database_url_rw": rw_url,
+            "database_url_ro": ro_url,
+            **overrides,
+        }
         if values["app_env"] == "production":
             values = {**PRODUCTION_SECRETS, **values}
         return Settings(**values)
