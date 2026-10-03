@@ -80,7 +80,16 @@ async def load_case(connection: AsyncConnection, conversation_id: int) -> CaseCo
 
 async def get_member_accounts(connection: AsyncConnection, member_id: int) -> list[MemberAccount]:
     rows = await connection.execute(
-        select(Account.id, Account.account_number, Account.is_primary, SubAccount)
+        select(
+            Account.id,
+            Account.account_number,
+            Account.is_primary,
+            SubAccount.id.label("sub_id"),
+            SubAccount.type,
+            SubAccount.name,
+            SubAccount.balance,
+            SubAccount.available,
+        )
         .join(SubAccount, SubAccount.account_id == Account.id)
         .where(Account.member_id == member_id)
         .order_by(Account.is_primary.desc(), Account.id, SubAccount.id)
@@ -97,14 +106,13 @@ async def get_member_accounts(connection: AsyncConnection, member_id: int) -> li
                 sub_accounts=[],
             ),
         )
-        sub = row.SubAccount
         sub_accounts[row.id].append(
             SubAccountInfo(
-                id=sub.id,
-                type=sub.type,
-                name=sub.name,
-                balance=sub.balance,
-                available=sub.available,
+                id=row.sub_id,
+                type=row.type,
+                name=row.name,
+                balance=row.balance,
+                available=row.available,
             )
         )
     return [
@@ -130,6 +138,22 @@ async def find_fee_candidates(
         FeeCandidate(transaction=_ledger(row), has_refund_action=row.has_refund_action)
         for row in rows
     ]
+
+
+async def get_fee(connection: AsyncConnection, transaction_id: int) -> FeeCandidate | None:
+    """One fee transaction with its refund_actions flag (BR-05), whoever the member is."""
+    row = (
+        await connection.execute(
+            _transactions()
+            .add_columns(RefundAction.id.is_not(None).label("has_refund_action"))
+            .outerjoin(RefundAction, RefundAction.fee_transaction_id == Transaction.id)
+            .where(Transaction.id == transaction_id, Transaction.amount < 0)
+            .where(Transaction.description.startswith(FEE_PREFIX, autoescape=True))
+        )
+    ).one_or_none()
+    if row is None:
+        return None
+    return FeeCandidate(transaction=_ledger(row), has_refund_action=row.has_refund_action)
 
 
 async def get_day_postings(

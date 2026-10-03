@@ -10,7 +10,7 @@ from app.agents.decider import Decisions, State
 from app.agents.errors import ModelUnavailable
 from app.agents.guard import check_draft, deterministic_failures
 from app.agents.questions import ChoiceAnswer, NoulAnswer, Question
-from app.agents.templates import FeeFacts, all_template_keys, render_template
+from app.agents.templates import FeeFacts, TemplateContext, all_template_keys, render_template
 from app.core.pricing import TokenUsage
 from app.rules.model import FeeType, Recommendation
 
@@ -127,12 +127,7 @@ FEE_FACTS = FeeFacts(FeeType.COURTESY_PAY, FEE, date(2026, 9, 14))
 @pytest.mark.parametrize(("key", "language"), all_template_keys())
 def test_every_template_renders_as_a_safe_short_reply(key, language) -> None:
     reply = render_template(
-        key,
-        language,
-        first_name="Ana",
-        credit_union="Riverbend Credit Union",
-        fee=FEE_FACTS,
-        claim_window_days=60,
+        key, language, TemplateContext("Ana", "Riverbend Credit Union", FEE_FACTS, 60)
     )
 
     assert "{" not in reply
@@ -160,12 +155,7 @@ def test_every_outcome_has_both_languages() -> None:
 @pytest.mark.parametrize("language", ["en", "es"])
 def test_the_manual_template_promises_nothing(language) -> None:
     reply = render_template(
-        "MANUAL",
-        language,
-        first_name="Noah",
-        credit_union="Riverbend Credit Union",
-        fee=None,
-        claim_window_days=60,
+        "MANUAL", language, TemplateContext("Noah", "Riverbend Credit Union", None, 60)
     )
 
     assert "$" not in reply

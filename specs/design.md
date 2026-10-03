@@ -275,8 +275,14 @@ manual_reason, step_log`.
 | 11 | `finalize` | service | saves proposal, case status; if tier AUTO → `RefundService.execute` + send reply + close | refund error → keep proposal, tier STAFF, log |
 
 Manual-review exits skip to `finalize` with `recommendation=MANUAL` and the reason code.
-`not_refund` exits save a proposal with `recommendation=MANUAL`, category `other`, case
-status `not_refund`, no draft.
+`not_refund` exits save a proposal with `recommendation=MANUAL`, reason code `NOT_A_REFUND`
+(BR-13), category `other`, case status `not_refund`, no draft.
+
+Failures always end in manual review (fail closed), with the reason of what failed:
+models (Jev and the Haiku fallback) → `AI_UNAVAILABLE`; database or tools →
+`DATA_UNAVAILABLE`; any unexpected exception (a bug) → the case shows `AI_UNAVAILABLE`, but
+`agent_steps.error_code` and `agent_runs.error_code` record `UNEXPECTED_ERROR` and an error
+log carries the trace (exception type and frames, never the message: it may hold member data).
 
 Whole-run timeout: `RUN_TIMEOUT_SECONDS=90` → `TIMEOUT`. Runs and steps are persisted as
 they happen (survive restart; a run left `running` on startup is marked `failed`, case →

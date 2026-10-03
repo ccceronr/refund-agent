@@ -111,6 +111,8 @@ review their output.
 **Tests:** graph routing with the decider/writer mocked: injection → manual; other intent →
 not_refund; 0/1/many candidates; writer failure → template; timeout → manual.
 **Covers:** R-04…R-13, R-20, R-30. **→ STOP** (show the CLI output for 5012, 5013, 5022)
+**Pending (2026-10-03):** built and tested with mocks only (no API keys yet). `make real-runs`
+runs the P4 smoke test and the three dry runs together once the keys are in `.env`.
 
 ## P6 — API, decisions and refunds (~3 h)
 - Routers per design §4: `/health`, `/cases`, `/cases/{id}`, `/cases/{id}/run` (SSE +

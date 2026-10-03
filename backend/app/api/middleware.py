@@ -16,6 +16,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.api.errors import INTERNAL_ERROR, PAYLOAD_TOO_LARGE, error_response
+from app.core.logging import error_trace
 
 REQUEST_ID_HEADER = "x-request-id"
 CSP_HEADER = "content-security-policy"
@@ -135,8 +136,8 @@ class UnhandledErrorMiddleware:
 
         try:
             await self.app(scope, receive, tracking_send)
-        except Exception:
-            log.exception("unhandled_error", path=scope["path"])
+        except Exception as error:
+            log.error("unhandled_error", path=scope["path"], **error_trace(error))
             if response_started:
                 raise
             response = error_response(HTTPStatus.INTERNAL_SERVER_ERROR, *INTERNAL_ERROR)

@@ -6,6 +6,8 @@ renderer, so every line in the Railway log view has the same shape.
 
 import logging
 import sys
+import traceback
+from typing import TextIO
 
 import structlog
 from structlog.typing import Processor
@@ -22,8 +24,12 @@ _SHARED_PROCESSORS: list[Processor] = [
 ]
 
 
-def configure_logging() -> None:
-    """Idempotent: safe to call again (tests, the app factory, CLI entry points)."""
+def configure_logging(stream: TextIO | None = None) -> None:
+    """Idempotent: safe to call again (tests, the app factory, CLI entry points).
+
+    Logs go to stdout (what Railway reads) unless a CLI passes stderr to keep stdout for
+    its own report.
+    """
     structlog.configure(
         processors=[*_SHARED_PROCESSORS, structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
         logger_factory=structlog.stdlib.LoggerFactory(),
@@ -32,9 +38,21 @@ def configure_logging() -> None:
     )
     root = logging.getLogger()
     root.handlers = [h for h in root.handlers if h.name != HANDLER_NAME]
-    root.addHandler(_json_handler())
+    root.addHandler(_json_handler(stream or sys.stdout))
     root.setLevel(LOG_LEVEL)
     _route_uvicorn_through_root()
+
+
+def error_trace(error: BaseException) -> dict[str, object]:
+    """The type and the frames of an error, for an error log line.
+
+    Never the message: an exception message can carry member data (no PII in logs).
+    """
+    frames = traceback.extract_tb(error.__traceback__)
+    return {
+        "error_type": type(error).__name__,
+        "traceback": [f"{f.filename}:{f.lineno} in {f.name}: {f.line}" for f in frames],
+    }
 
 
 def _drop_terminal_colour_copy(
@@ -45,7 +63,7 @@ def _drop_terminal_colour_copy(
     return event_dict
 
 
-def _json_handler() -> logging.Handler:
+def _json_handler(stream: TextIO) -> logging.Handler:
     formatter = structlog.stdlib.ProcessorFormatter(
         foreign_pre_chain=[
             *_SHARED_PROCESSORS,
@@ -58,7 +76,7 @@ def _json_handler() -> logging.Handler:
             structlog.processors.JSONRenderer(),
         ],
     )
-    handler = logging.StreamHandler(sys.stdout)
+    handler = logging.StreamHandler(stream)
     handler.set_name(HANDLER_NAME)
     handler.setFormatter(formatter)
     return handler

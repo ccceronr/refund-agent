@@ -6,10 +6,12 @@ Needs a Postgres superuser URL for a database used only by tests
 """
 
 import asyncio
+import io
+import logging
 import os
 import subprocess
 import sys
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable, Iterator
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -21,7 +23,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.engine import make_url
 
 from app.core.config import Settings
-from app.core.logging import configure_logging
+from app.core.logging import HANDLER_NAME, configure_logging
 from app.db.bootstrap_roles import RolePasswords, bootstrap_roles
 from app.main import create_app
 
@@ -68,6 +70,20 @@ async def _create_database_if_missing(admin_url: str) -> None:
 @pytest.fixture(scope="session", autouse=True)
 def json_logging() -> None:
     configure_logging()
+
+
+@pytest.fixture
+def log_output() -> Iterator[io.StringIO]:
+    """The JSON lines our log handler writes, captured for assertions."""
+    configure_logging()
+    handler = next(h for h in logging.getLogger().handlers if h.name == HANDLER_NAME)
+    assert isinstance(handler, logging.StreamHandler)
+    stream = io.StringIO()
+    previous = handler.setStream(stream)
+    try:
+        yield stream
+    finally:
+        handler.setStream(previous)
 
 
 @pytest.fixture(autouse=True)
@@ -156,6 +172,13 @@ def seeded_db(database_env: dict[str, str]) -> dict[str, str]:
         result = _run_backend_cli(database_env, *args)
         assert result.returncode == 0, result.stderr or result.stdout
     return database_env
+
+
+@pytest.fixture
+def fresh_db(seeded_db: dict[str, str]) -> None:
+    """Re-seeds refunds_test before a test that writes (decisions, refunds, runs)."""
+    result = _run_backend_cli(seeded_db, "-m", "seed.seed", "--reset")
+    assert result.returncode == 0, result.stderr or result.stdout
 
 
 @pytest.fixture
