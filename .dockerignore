@@ -1,0 +1,19 @@
+# Only what the image build needs: backend/ and frontend/ sources.
+.git
+.github
+.env
+.env.*
+**/__pycache__
+**/*.py[cod]
+**/.venv
+**/.mypy_cache
+**/.pytest_cache
+**/.ruff_cache
+**/node_modules
+frontend/dist
+frontend/coverage
+backend/app/static
+tests
+evals
+specs
+docs

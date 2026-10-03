@@ -1,0 +1,45 @@
+[project]
+name = "fee-refund-agent"
+version = "0.1.0"
+description = "Prepares fee refund cases so staff can decide in seconds (Blossom technical test)."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "alembic>=1.20.0",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.142.2",
+    "pydantic-settings>=2.15.0",
+    "sqlalchemy[asyncio]>=2.1.3",
+    "structlog>=26.1.0",
+    "uvicorn>=0.54.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.22,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "app"
+module-root = ""
+
+[dependency-groups]
+dev = [
+    "asyncpg-stubs>=0.31.3",
+    "httpx>=0.28.1",
+    "mypy>=2.4.0",
+    "pip-audit>=2.10.1",
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.16.10",
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["app"]
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true

@@ -1,0 +1,29 @@
+# One config for every Python file in the repo (backend/, tests/, evals/).
+line-length = 100
+target-version = "py312"
+extend-exclude = ["frontend"]
+
+[lint]
+select = [
+  "E", "W", "F",   # pycodestyle, pyflakes
+  "I",             # import order
+  "B",             # bugbear
+  "UP",            # modern syntax
+  "S",             # security (bandit)
+  "ASYNC",         # async pitfalls
+  "SIM", "C4",     # simplifications
+  "N",             # naming
+  "PT",            # pytest style
+  "T20",           # no print()
+  "ERA",           # no commented-out code
+  "PL",            # pylint (incl. magic numbers)
+  "RUF",
+]
+# CLAUDE.md names domain exceptions without an "Error" suffix (CaseAlreadyDecided, ...).
+ignore = ["N818"]
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "PLR2004"]
+
+[lint.isort]
+known-first-party = ["app"]

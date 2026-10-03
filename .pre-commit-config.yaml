@@ -1,0 +1,51 @@
+# Quality gates before every commit (R-37). Install once: `make hooks`.
+# Python and JS tools run from the lockfiles (uv.lock, package-lock.json), so the hooks
+# use exactly the versions CI uses.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  # Secret scan of the staged changes (CLAUDE.md security checklist).
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --project backend ruff check --force-exclude
+        language: system
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --project backend ruff format --force-exclude
+        language: system
+        types_or: [python, pyi]
+      - id: mypy
+        name: mypy (strict, backend/app)
+        entry: bash -c 'cd backend && uv run mypy'
+        language: system
+        files: ^backend/
+        pass_filenames: false
+      - id: eslint
+        name: eslint
+        entry: npm --prefix frontend run lint
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+      - id: prettier
+        name: prettier --check
+        entry: npm --prefix frontend run format:check
+        language: system
+        files: ^frontend/
+        pass_filenames: false

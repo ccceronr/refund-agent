@@ -1,0 +1,66 @@
+# Local run (R-36): `docker compose up` → db, migrate (roles + migrations), app on :8000.
+# The app serves both /api and the built frontend (design §1 "Serving").
+# Secrets come from .env (copy .env.example); compose builds the DB URLs from the passwords.
+
+name: fee-refund-agent
+
+x-app: &app
+  # One image for migrate and app (design §11); compose builds it once.
+  image: fee-refund-agent:local
+  build:
+    context: .
+  env_file: .env
+  environment: &database-urls
+    DATABASE_URL_RW: postgresql+asyncpg://app_rw:${APP_RW_PASSWORD:?set APP_RW_PASSWORD in .env}@db:5432/refunds
+    DATABASE_URL_RO: postgresql+asyncpg://agent_ro:${AGENT_RO_PASSWORD:?set AGENT_RO_PASSWORD in .env}@db:5432/refunds
+
+services:
+  db:
+    image: postgres:16.15-alpine3.24
+    environment:
+      POSTGRES_DB: refunds
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      # Localhost only, for `make test`. An uncommon host port (DB_HOST_PORT) so it
+      # never clashes with a Postgres already on the machine; inside Docker it is 5432.
+      - "127.0.0.1:${DB_HOST_PORT:-54320}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d refunds"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  migrate:
+    <<: *app
+    environment:
+      <<: *database-urls
+      # The admin URL is given to this one-shot service only (design §3.3).
+      DATABASE_ADMIN_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/refunds
+    command: ["sh", "-c", "python -m app.db.bootstrap_roles && alembic upgrade head"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    <<: *app
+    environment:
+      <<: *database-urls
+      # Least privilege: the long-running app never holds the superuser password.
+      POSTGRES_PASSWORD: ""
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  db-data:
