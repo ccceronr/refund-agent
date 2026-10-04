@@ -203,8 +203,8 @@ Send you any failing build/deploy log (paste the log, never secrets).
   Actions; plus the "at scale" note (design §1). Export PNG too.
 - `docs/diagrams/agent-flow.md`: Mermaid flow (design §5, §7.4) + the prompts and Jev
   questions listed below it.
-- `docs/demo-script.md`: a 90-second script for the end-to-end demo video (required
-  deliverable).
+- ~~`docs/demo-script.md`~~: removed at Camila's request; the video follows the README's
+  demo walkthrough.
 - CI green. Fresh clone → `cp .env.example .env` → add keys → `docker compose up` works.
 **👤 Camila:** record the demo video following the script; review the README and diagrams;
 make the repo accessible to the reviewers.

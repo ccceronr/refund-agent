@@ -19,11 +19,21 @@ updates:
     directory: /
     schedule:
       interval: weekly
+  # The stack is fixed (CLAUDE.md): Python 3.12, Node 22 LTS, PostgreSQL 16. Patch updates
+  # of those images still come; moving to a new version is a decision, not a bump.
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: docker-compose
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]
