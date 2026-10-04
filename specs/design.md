@@ -530,8 +530,8 @@ unless `APP_ENV != production`.
   migrations, seed and startup recovery all work.
 - Pre-deploy (`sh bin/pre-deploy.sh`), health check (`/api/health`, 120 s) and restart
   policy (on failure, 3) are set in the Railway dashboard. A `railway.toml` was tried and
-  removed: Railway mapped those fields to the file but never applied them, and ignored the
-  dashboard values while the file existed.
+  removed: Railway never applied its `[deploy]` section; the dashboard values apply once
+  each field is saved and the service is deployed (verified in the manifest and logs).
 - Demo reset in production: `DEMO_RESET=<RAILWAY_PUBLIC_DOMAIN>@<today UTC>` makes the
   pre-deploy reload the seed once, as `app_rw`, keeping the audit log (`seed/reset_demo.py`).
 - Roles bootstrap: once, before the first deploy, from Camila's machine with
