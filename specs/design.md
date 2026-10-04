@@ -433,7 +433,12 @@ The draft passes only if all are true:
   `BR-`, `core`, `system prompt`, digits sequences ≥ 5 long, i.e. no IDs/account numbers).
 - Language check: Jev noul "Is this text written in {language}?" ≥ 0.85 (Haiku fallback).
 - Outcome consistency: Jev choice over `{refund_confirmed, refund_denied, other}` matches
-  the recommendation with conf ≥ 0.85.
+  the recommendation with conf ≥ 0.85. Criteria: `refund_confirmed` "This reply tells the
+  member we are refunding this fee now"; `refund_denied` "This reply tells the member this
+  fee will not be refunded now, for any reason (including that it was refunded before)";
+  `other` "Neither: no decision about a refund is stated". ("Now" matters: with "The fee has
+  been refunded", a correct "that fee was already refunded" denial read as a confirmation;
+  eval E15.)
 - ≤ 120 words.
 (The two Jev questions go in one request.)
 

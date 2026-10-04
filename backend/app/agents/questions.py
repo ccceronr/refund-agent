@@ -120,8 +120,9 @@ def guard_questions(language_name: str) -> dict[str, Question]:
         "outcome": ChoiceQuestion(
             instructions="What does this reply tell the member about the fee?",
             criteria={
-                "refund_confirmed": "The fee has been refunded",
-                "refund_denied": "The fee will not be refunded",
+                # "Now" matters: "that fee was already refunded" is a denial (eval E15).
+                "refund_confirmed": "This reply tells the member we are refunding this fee now",
+                "refund_denied": "This reply tells the member this fee will not be refunded now, for any reason (including that it was refunded before)",
                 "other": "Neither: no decision about a refund is stated",
             },
         ),

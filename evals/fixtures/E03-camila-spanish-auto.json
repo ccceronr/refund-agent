@@ -13,9 +13,9 @@
             "type": "choice",
             "choice": "fee_refund",
             "probabilities": {
+              "fee_refund": 1.0,
               "other_banking": 0.0,
-              "unclear": 0.0,
-              "fee_refund": 1.0
+              "unclear": 0.0
             },
             "confidence": 1.0
           },
@@ -27,9 +27,9 @@
             "type": "choice",
             "choice": "es",
             "probabilities": {
-              "es": 1.0,
               "other": 0.0,
-              "en": 0.0
+              "en": 0.0,
+              "es": 1.0
             },
             "confidence": 1.0
           },
@@ -37,9 +37,9 @@
             "type": "choice",
             "choice": "neutral",
             "probabilities": {
+              "neutral": 0.5,
               "upset": 0.27,
-              "friendly": 0.23,
-              "neutral": 0.5
+              "friendly": 0.23
             },
             "confidence": 0.24
           }
@@ -53,7 +53,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000027972",
-        "latency_ms": 203
+        "latency_ms": 221
       }
     },
     {
@@ -66,10 +66,10 @@
             "type": "choice",
             "choice": "p1",
             "probabilities": {
-              "p5": 0.0,
-              "none": 0.0,
               "p4": 0.0,
               "p2": 0.0,
+              "p5": 0.0,
+              "none": 0.0,
               "p3": 0.0,
               "p1": 1.0
             },
@@ -85,7 +85,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000023142",
-        "latency_ms": 241
+        "latency_ms": 224
       }
     },
     {
@@ -103,38 +103,38 @@
             "type": "choice",
             "choice": "refund_confirmed",
             "probabilities": {
-              "refund_denied": 0.0,
-              "refund_confirmed": 1.0,
-              "other": 0.0
+              "other": 0.0,
+              "refund_denied": 0.02,
+              "refund_confirmed": 0.98
             },
-            "confidence": 1.0
+            "confidence": 0.98
           }
         },
         "source": "jev",
         "model": "jev-1.13.0",
         "usage": {
-          "input_tokens": 425,
+          "input_tokens": 450,
           "output_tokens": 63,
           "cache_read_tokens": 0,
           "cache_write_tokens": 0
         },
-        "cost_usd": "0.00001785",
-        "latency_ms": 215
+        "cost_usd": "0.0000189",
+        "latency_ms": 213
       }
     }
   ],
   "writer": [
     {
-      "text": "Hola, Camila:\n\nYa te reembolsamos la comisión por sobregiro de $35.00 del 17 de septiembre. El dinero está de nuevo en tu cuenta hoy.\n\nGracias por escribirnos.\n\nEquipo de atención al asociado de Riverbend Credit Union",
+      "text": "Hola, Camila:\n\nYa reembolsamos la comisión por sobregiro de $35.00 del 17 de septiembre. El dinero está de nuevo en tu cuenta hoy.\n\nGracias por escribirnos.\n\nEquipo de atención al asociado de Riverbend Credit Union",
       "model": "claude-sonnet-5-5",
       "usage": {
         "input_tokens": 182,
-        "output_tokens": 103,
+        "output_tokens": 102,
         "cache_read_tokens": 1082,
         "cache_write_tokens": 0
       },
-      "cost_usd": "0.0016104",
-      "latency_ms": 1545
+      "cost_usd": "0.0016004",
+      "latency_ms": 1761
     }
   ]
 }

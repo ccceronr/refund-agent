@@ -21,15 +21,15 @@
           },
           "injection": {
             "type": "noul",
-            "noul": 0.11
+            "noul": 0.09
           },
           "language": {
             "type": "choice",
             "choice": "en",
             "probabilities": {
-              "es": 0.0,
+              "other": 0.0,
               "en": 1.0,
-              "other": 0.0
+              "es": 0.0
             },
             "confidence": 1.0
           },
@@ -37,8 +37,8 @@
             "type": "choice",
             "choice": "upset",
             "probabilities": {
-              "upset": 1.0,
               "friendly": 0.0,
+              "upset": 1.0,
               "neutral": 0.0
             },
             "confidence": 1.0
@@ -53,7 +53,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.00002772",
-        "latency_ms": 235
+        "latency_ms": 217
       }
     },
     {
@@ -66,12 +66,12 @@
             "type": "choice",
             "choice": "p1",
             "probabilities": {
-              "p2": 0.0,
-              "p4": 0.0,
-              "none": 0.0,
-              "p1": 1.0,
               "p3": 0.0,
-              "p5": 0.0
+              "p5": 0.0,
+              "p4": 0.0,
+              "p1": 1.0,
+              "none": 0.0,
+              "p2": 0.0
             },
             "confidence": 1.0
           }
@@ -85,7 +85,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000023142",
-        "latency_ms": 219
+        "latency_ms": 209
       }
     },
     {
@@ -97,15 +97,15 @@
         "answers": {
           "language": {
             "type": "noul",
-            "noul": 1.0
+            "noul": 0.99
           },
           "outcome": {
             "type": "choice",
             "choice": "refund_confirmed",
             "probabilities": {
+              "other": 0.0,
               "refund_denied": 0.0,
-              "refund_confirmed": 1.0,
-              "other": 0.0
+              "refund_confirmed": 1.0
             },
             "confidence": 1.0
           }
@@ -113,28 +113,28 @@
         "source": "jev",
         "model": "jev-1.13.0",
         "usage": {
-          "input_tokens": 413,
+          "input_tokens": 441,
           "output_tokens": 63,
           "cache_read_tokens": 0,
           "cache_write_tokens": 0
         },
-        "cost_usd": "0.000017346",
-        "latency_ms": 231
+        "cost_usd": "0.000018522",
+        "latency_ms": 236
       }
     }
   ],
   "writer": [
     {
-      "text": "Hi Ana,\n\nI'm sorry about the frustration. We've refunded the $35.00 overdraft fee from September 14. The money is back in your account today.\n\nThank you for reaching out.\n\nRiverbend Credit Union Member Support",
+      "text": "Hi Ana,\n\nI'm sorry this has been so frustrating. We've refunded the $35.00 overdraft fee from September 14. The money is back in your account today.\n\nThank you for reaching out.\n\nRiverbend Credit Union Member Support",
       "model": "claude-sonnet-5-5",
       "usage": {
         "input_tokens": 160,
-        "output_tokens": 79,
+        "output_tokens": 82,
         "cache_read_tokens": 1082,
         "cache_write_tokens": 0
       },
-      "cost_usd": "0.0013264",
-      "latency_ms": 1520
+      "cost_usd": "0.0013564",
+      "latency_ms": 1748
     }
   ]
 }

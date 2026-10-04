@@ -9,13 +9,23 @@
       ],
       "decisions": {
         "answers": {
+          "tone": {
+            "type": "choice",
+            "choice": "neutral",
+            "probabilities": {
+              "neutral": 0.97,
+              "upset": 0.01,
+              "friendly": 0.02
+            },
+            "confidence": 0.97
+          },
           "intent": {
             "type": "choice",
             "choice": "fee_refund",
             "probabilities": {
               "fee_refund": 1.0,
-              "unclear": 0.0,
-              "other_banking": 0.0
+              "other_banking": 0.0,
+              "unclear": 0.0
             },
             "confidence": 1.0
           },
@@ -27,21 +37,11 @@
             "type": "choice",
             "choice": "en",
             "probabilities": {
-              "es": 0.0,
               "en": 1.0,
-              "other": 0.0
+              "other": 0.0,
+              "es": 0.0
             },
             "confidence": 1.0
-          },
-          "tone": {
-            "type": "choice",
-            "choice": "neutral",
-            "probabilities": {
-              "friendly": 0.01,
-              "upset": 0.01,
-              "neutral": 0.98
-            },
-            "confidence": 0.97
           }
         },
         "source": "jev",
@@ -53,7 +53,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000027594",
-        "latency_ms": 212
+        "latency_ms": 216
       }
     },
     {
@@ -66,11 +66,11 @@
             "type": "choice",
             "choice": "none",
             "probabilities": {
-              "p2": 0.0,
               "p3": 0.0,
-              "p4": 0.01,
+              "p2": 0.0,
+              "p4": 0.0,
+              "p1": 0.22,
               "p5": 0.0,
-              "p1": 0.21,
               "none": 0.78
             },
             "confidence": 0.73
@@ -85,7 +85,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000022176",
-        "latency_ms": 264
+        "latency_ms": 196
       }
     },
     {
@@ -95,46 +95,46 @@
       ],
       "decisions": {
         "answers": {
-          "outcome": {
-            "type": "choice",
-            "choice": "refund_confirmed",
-            "probabilities": {
-              "refund_confirmed": 0.77,
-              "other": 0.0,
-              "refund_denied": 0.23
-            },
-            "confidence": 0.66
-          },
           "language": {
             "type": "noul",
-            "noul": 1.0
+            "noul": 0.99
+          },
+          "outcome": {
+            "type": "choice",
+            "choice": "refund_denied",
+            "probabilities": {
+              "other": 0.0,
+              "refund_confirmed": 0.0,
+              "refund_denied": 1.0
+            },
+            "confidence": 1.0
           }
         },
         "source": "jev",
         "model": "jev-1.13.0",
         "usage": {
-          "input_tokens": 410,
-          "output_tokens": 63,
+          "input_tokens": 435,
+          "output_tokens": 62,
           "cache_read_tokens": 0,
           "cache_write_tokens": 0
         },
-        "cost_usd": "0.00001722",
-        "latency_ms": 202
+        "cost_usd": "0.00001827",
+        "latency_ms": 209
       }
     }
   ],
   "writer": [
     {
-      "text": "Hi Ava,\n\nWe can't refund the $35.00 overdraft fee from September 10 again, because that fee has already been refunded. Is there anything else we can help you with?\n\nRiverbend Credit Union Member Support",
+      "text": "Hi Ava,\n\nWe can't refund the $35.00 overdraft fee from September 10 again, because that fee was already refunded. Is there anything else we can help you with?\n\nRiverbend Credit Union Member Support",
       "model": "claude-sonnet-5-5",
       "usage": {
         "input_tokens": 166,
-        "output_tokens": 72,
+        "output_tokens": 71,
         "cache_read_tokens": 1082,
         "cache_write_tokens": 0
       },
-      "cost_usd": "0.0012684",
-      "latency_ms": 1514
+      "cost_usd": "0.0012584",
+      "latency_ms": 1576
     }
   ]
 }

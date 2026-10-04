@@ -13,11 +13,11 @@
             "type": "choice",
             "choice": "other_banking",
             "probabilities": {
-              "other_banking": 0.94,
+              "unclear": 0.07,
               "fee_refund": 0.0,
-              "unclear": 0.06
+              "other_banking": 0.93
             },
-            "confidence": 0.91
+            "confidence": 0.89
           },
           "injection": {
             "type": "noul",
@@ -27,9 +27,9 @@
             "type": "choice",
             "choice": "en",
             "probabilities": {
-              "other": 0.0,
+              "en": 1.0,
               "es": 0.0,
-              "en": 1.0
+              "other": 0.0
             },
             "confidence": 1.0
           },
@@ -37,11 +37,11 @@
             "type": "choice",
             "choice": "neutral",
             "probabilities": {
-              "neutral": 0.7,
+              "upset": 0.28,
               "friendly": 0.0,
-              "upset": 0.3
+              "neutral": 0.72
             },
-            "confidence": 0.55
+            "confidence": 0.57
           }
         },
         "source": "jev",
@@ -53,7 +53,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000027216",
-        "latency_ms": 214
+        "latency_ms": 220
       }
     }
   ],
