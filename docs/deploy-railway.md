@@ -19,11 +19,18 @@ in shell history: secrets go from a generator (or the clipboard) straight into R
 
 1. Railway dashboard → **New Project** → **Deploy from GitHub repo** → pick this repo.
    Rename the created service to `app`. Root directory: the repo root (default).
-   Railway reads `railway.toml` (Dockerfile build, pre-deploy, health check).
    The first build may fail until the variables exist: that's expected.
 2. In the project: **+ New** → **Database** → **PostgreSQL**. Keep the service name
-   `Postgres` (the variables below reference it by name).
-3. In a terminal at the repo root: `railway link` → this project, environment
+   `Postgres` (the variables below reference it by name). Railway's template defaults to
+   PostgreSQL **18**; the stack (and CI, compose) is **16**: set the service's source image
+   to `ghcr.io/railwayapp-templates/postgres-ssl:16` before it holds data (changing the
+   major version later means a new volume).
+3. `app` → **Settings** → **Deploy**, set these by hand (see "What we learned" below:
+   Railway did not apply the `[deploy]` section of `railway.toml` on this project):
+   - **Pre-deploy command**: `sh bin/pre-deploy.sh`
+   - **Healthcheck path**: `/api/health`, timeout `120`
+   - **Restart policy**: On failure, max retries `3`
+4. In a terminal at the repo root: `railway link` → this project, environment
    `production`, service `app`.
 
 ## 2. Variables of the `app` service
@@ -83,8 +90,13 @@ after GitHub Actions passes (OWASP A08).
 ## 4. Roles bootstrap, once, from your machine
 
 The app connects as `app_rw` and `agent_ro`; they must exist before the first deploy.
-This step uses the Postgres superuser through Railway's public TCP proxy, from your
+This step uses the Postgres superuser through Railway's public endpoint, from your
 machine only. The app service never holds that URL (design §3.3).
+
+1. `Postgres` → **Settings** → **Networking** → **Public Access** (formerly "TCP Proxy")
+   → enable it. Only while it is on does the service have `DATABASE_PUBLIC_URL`.
+2. Press **Deploy** on the Postgres service if the dashboard shows staged changes.
+3. Run the bootstrap:
 
 ```bash
 export DATABASE_ADMIN_URL="$(railway variable list --service Postgres --kv | sed -n 's/^DATABASE_PUBLIC_URL=//p')"
@@ -95,6 +107,9 @@ unset DATABASE_ADMIN_URL
 It logs `roles_bootstrapped` on success. Run it again only if you change a role password
 (then redeploy). If it fails because the user cannot create roles, stop and send the
 error line (no secrets).
+
+4. **Turn Public Access off again** (and Deploy the staged change). The database is then
+   reachable only from inside the project, over the private network.
 
 ## 5. Deploy and domain
 
@@ -107,6 +122,14 @@ error line (no secrets).
 
 ## 6. Check it
 
+The pre-deploy must have run before the app started: the deployment logs show
+`Running upgrade` (alembic) and `seed_loaded` or `seed_skipped` before `Started server
+process`, and no `run_recovery_failed`. The active deployment's settings:
+
+```bash
+railway status --json | grep -o '"preDeployCommand":[^,]*' | sort -u   # not null
+```
+
 Replace `<domain>` with the generated one.
 
 ```bash
@@ -118,3 +141,31 @@ curl -s https://<domain>/api/does-not-exist                 # JSON 404, not the 
 Then in the browser: sign in as `luis` (password: `railway variable list --service app --kv`
 on your machine, never in chat), open a case and let it prepare, and check the `app` logs
 (JSON lines with a `request_id`, no names or message text).
+
+Checked on production (2026-10-03): `Strict-Transport-Security`, `Content-Security-Policy`,
+`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`; http → https (301); unknown
+`/api/...` → JSON 404; `/docs` and `/openapi.json` → 404; no session → 401; a change without
+`X-Requested-With` → 403; session cookie `Secure; HttpOnly; SameSite=Strict; Max-Age=28800`;
+`app` has no `DATABASE_ADMIN_URL`/`POSTGRES_PASSWORD`; database URLs use the private host
+with `?ssl=require`; Postgres has no public endpoint; logs carry `request_id` and no names,
+message text or account numbers (variable names only: `railway variable list --kv | cut -d= -f1`).
+
+## What we learned
+
+- **SSH from WSL did not work.** `railway ssh` (and the SSH tunnel) needs an SSH key
+  Railway can use without a prompt; a passphrase-protected key fails in WSL (no
+  `ssh-askpass`). Use Public Access for the one-time bootstrap instead, then close it.
+- **"TCP Proxy" is now "Public Access"** (Postgres → Settings → Networking). It was opened
+  only for the roles bootstrap and closed right after.
+- **Dashboard changes are staged.** Variables and settings apply only after pressing
+  **Deploy** on the banner; until then the running deployment keeps the old values.
+- **`railway.toml` `[deploy]` was not applied here.** The build used the Dockerfile, but the
+  active deployment had no pre-deploy command and no health check (its manifest showed
+  `preDeployCommand: null`, `healthcheckPath: null`, default restart retries), so the app
+  started twice before the tables existed (`relation "agent_runs" does not exist` in the
+  Postgres log, `run_recovery_failed` in the app log). Setting them in the dashboard
+  (step 1.3) is the reliable path. Railway now marks Config as Code as deprecated
+  (`railway.toml` keeps working until 2026-12-01) in favour of Infrastructure as Code
+  (`.railway/railway.ts`; preview with `railway config migrate`, a dry run by default).
+- **PostgreSQL 18 by default.** Railway's template ships 18; everything also works on 18
+  (checked locally: bootstrap, migrations, seed, startup recovery), but the stack is 16.
