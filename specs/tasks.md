@@ -158,7 +158,7 @@ then ask).
 
 ## P9 — Deploy to Railway (~2 h)
 Read design §11 and the current Railway docs first.
-- Root `railway.toml` for the single `app` service (build from the root `Dockerfile`,
+- (Done in the dashboard, not `railway.toml`; see design §11.) Deploy settings for the single `app` service (build from the root `Dockerfile`,
   health check `/api/health`, pre-deploy command `alembic upgrade head` + `seed
   --if-empty` as `app_rw`, restart policy). No roles bootstrap in the deploy (design §3.3).
 - `docs/deploy-railway.md`: the exact steps Camila follows, and the full list of variables

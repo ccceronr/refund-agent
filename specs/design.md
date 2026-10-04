@@ -87,7 +87,7 @@ tests/
   e2e/                    Playwright
 docs/diagrams/            system-design.md, agent-flow.md (Mermaid)
 specs/                    these specs
-Dockerfile  railway.toml  docker-compose.yml  .env.example  Makefile  .pre-commit-config.yaml
+Dockerfile  docker-compose.yml  .env.example  Makefile  .pre-commit-config.yaml
 .github/workflows/ci.yml  README.md  CLAUDE.md
 ```
 Frontend unit tests live next to the code (`frontend/src/**/*.test.ts(x)`).
@@ -513,7 +513,7 @@ unless `APP_ENV != production`.
 ## 11. Railway deployment
 - One Railway project, environment `production`: **Postgres** (Railway database) and one
   **app** service built from the root `Dockerfile` (repo root as build context).
-  Config as code: root `railway.toml`.
+  Deploy settings live in the Railway dashboard (no config file; see below).
 - Image (multi-stage, pinned base images, no `latest`): stage 1 (Node) runs `npm ci` and
   `npm run build` in `frontend/`; stage 2 (Python 3.12 slim) installs the backend with uv
   from `uv.lock`, copies `frontend/dist/` to `backend/app/static/` and runs as a non-root
@@ -528,8 +528,10 @@ unless `APP_ENV != production`.
 - **Deviation: PostgreSQL 18 in production.** Railway's Postgres template ships 18 (the
   stack, compose and CI use 16). Kept on 18 after checking locally on 18: roles bootstrap,
   migrations, seed and startup recovery all work.
-- Pre-deploy, health check and restart policy are set in the Railway dashboard: this
-  project did not apply the `[deploy]` section of `railway.toml` (kept as documentation).
+- Pre-deploy (`sh bin/pre-deploy.sh`), health check (`/api/health`, 120 s) and restart
+  policy (on failure, 3) are set in the Railway dashboard. A `railway.toml` was tried and
+  removed: Railway mapped those fields to the file but never applied them, and ignored the
+  dashboard values while the file existed.
 - Demo reset in production: `DEMO_RESET=<RAILWAY_PUBLIC_DOMAIN>@<today UTC>` makes the
   pre-deploy reload the seed once, as `app_rw`, keeping the audit log (`seed/reset_demo.py`).
 - Roles bootstrap: once, before the first deploy, from Camila's machine with

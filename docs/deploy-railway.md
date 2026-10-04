@@ -23,8 +23,8 @@ in shell history: secrets go from a generator (or the clipboard) straight into R
 2. In the project: **+ New** → **Database** → **PostgreSQL**. Keep the service name
    `Postgres` (the variables below reference it by name). Railway's template is
    PostgreSQL **18**; compose and CI use 16. Production runs on 18 (design §11).
-3. `app` → **Settings** → **Deploy**, set these by hand (see "What we learned" below:
-   Railway did not apply the `[deploy]` section of `railway.toml` on this project):
+3. `app` → **Settings** → **Deploy**, set these by hand (the dashboard is the only source
+   of these settings; see "What we learned" below):
    - **Pre-deploy command**: `sh bin/pre-deploy.sh`
    - **Healthcheck path**: `/api/health`, timeout `120`
    - **Restart policy**: On failure, max retries `3`
@@ -173,14 +173,19 @@ when done: `railway variable delete DEMO_RESET --service app`.
   only for the roles bootstrap and closed right after.
 - **Dashboard changes are staged.** Variables and settings apply only after pressing
   **Deploy** on the banner; until then the running deployment keeps the old values.
-- **`railway.toml` `[deploy]` was not applied here.** The build used the Dockerfile, but the
-  active deployment had no pre-deploy command and no health check (its manifest showed
-  `preDeployCommand: null`, `healthcheckPath: null`, default restart retries), so the app
-  started twice before the tables existed (`relation "agent_runs" does not exist` in the
-  Postgres log, `run_recovery_failed` in the app log). Setting them in the dashboard
-  (step 1.3) is the reliable path. Railway now marks Config as Code as deprecated
-  (`railway.toml` keeps working until 2026-12-01) in favour of Infrastructure as Code
-  (`.railway/railway.ts`; preview with `railway config migrate`, a dry run by default).
+- **`railway.toml` took over the deploy settings without applying them.** The deployment
+  recorded those fields as coming from the file (`propertyFileMapping.deploy.preDeployCommand
+  = $.deploy.preDeployCommand`), yet its manifest showed `preDeployCommand: null`,
+  `healthcheckPath: null` and the default restart retries, and the values set by hand in
+  the dashboard were ignored too. Its format was valid (array form, schema-checked; the
+  plain-string `healthcheckPath` was dropped as well). So the app started twice before the
+  tables existed (`relation "agent_runs" does not exist`, `run_recovery_failed`). The file
+  was removed; the dashboard now holds the pre-deploy, health check and restart policy
+  (step 1.3), and the Dockerfile is still picked up on its own. Railway marks Config as
+  Code as deprecated in favour of Infrastructure as Code (`.railway/railway.ts`).
+- **How the tables first appeared is not explained.** The app's startup errors show they
+  did not exist at 02:24 and 02:29 UTC, and nobody ran migrations by hand; with the
+  pre-deploy active this no longer matters.
 - **PostgreSQL 18 by default.** Railway's template ships 18 and production stays on 18 (a
   documented deviation from the stack's 16; design §11). Checked locally on 18: roles
   bootstrap, migrations, seed and startup recovery all work.
