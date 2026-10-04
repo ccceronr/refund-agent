@@ -2,7 +2,7 @@
 # One image for the whole app (design §1 "Serving", §11): Node builds the SPA, then the
 # Python image serves both /api and the built files. Used by compose and by Railway.
 
-FROM node:22.23.3-alpine3.24 AS frontend
+FROM node:26.10.0-alpine3.24 AS frontend
 WORKDIR /frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund
