@@ -9,7 +9,7 @@ RUN npm ci --no-audit --no-fund
 COPY frontend/ ./
 RUN npm run build
 
-FROM python:3.12.15-slim-trixie AS app
+FROM python:3.14.7-slim-trixie AS app
 COPY --from=ghcr.io/astral-sh/uv:0.12.22 /uv /bin/uv
 # No BuildKit cache mounts: Railway requires a service-specific mount id
 # (docs.railway.com/builds/dockerfiles#cache-mounts) and compose uses this same file.
