@@ -1,0 +1,9 @@
+{
+  "id": "E21-priya-address-change",
+  "description": "Address change → not a refund request",
+  "conversation_id": 5010,
+  "message_override": null,
+  "expected": {
+    "case_status": "not_refund"
+  }
+}

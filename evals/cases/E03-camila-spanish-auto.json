@@ -1,0 +1,16 @@
+{
+  "id": "E03-camila-spanish-auto",
+  "description": "Spanish message, same-day salary → automatic refund, reply in Spanish",
+  "conversation_id": 5014,
+  "message_override": null,
+  "expected": {
+    "recommendation": "REFUND",
+    "reason_code": "ELIGIBLE",
+    "tier": [
+      "AUTO"
+    ],
+    "fee_date": "2026-09-17",
+    "language": "es",
+    "case_status": "auto_resolved"
+  }
+}

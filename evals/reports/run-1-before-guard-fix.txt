@@ -1,0 +1,35 @@
+  case    conv  recomm  reason    tier  fee_da  langua  case_s  guard_  no_int  amount      ms    cost
+   E01    5012       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓    2921  0.00374
+   E02    5013       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓    2553  0.00131
+   E03    5014       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓    2407  0.00168
+   E04    5015       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓    2751  0.00168
+   E05    5016       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓    2584  0.00124
+   E06    5017       ✓       ✓       ✓       ✓       ✓       -       ✓       ✓       ✓    2785  0.00176
+   E07    5018       ✓       ✓       ✓       ✓       ✓       -       ✓       ✓       ✓    2681  0.00183
+   E08    5019       ✓       ✓       ✓       ✓       ✓       -       ✓       ✓       ✓    2837  0.00162
+   E09    5020       ✓       ✓       ✓       ✓       ✓       -       ✓       ✓       ✓    2881  0.00160
+   E10    5021       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓    2310  0.00127
+   E11    5022       ✓       ✓       ✓       -       -       ✓       -       ✓       -     332  0.00003
+   E12    5023       ✓       ✓       ✓       -       -       ✓       -       ✓       -     634  0.00005
+   E13    5024       ✓       ✓       ✓       ✓       ✓       -       ✓       ✓       ✓    2547  0.00130
+   E14    5025       ✓       ✓       ✓       ✓       ✓       -       ✓       ✓       ✓    2649  0.00157
+   E15    5026       ✓       ✓       ✓       ✓       ✓       -       ✗       ✓       ✓    2407  0.00134
+   E16    5027       ✓       ✓       ✓       -       -       ✓       -       ✓       -     411  0.00003
+   E17    5028       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓    2422  0.00129
+   E18    5029       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓       ✓    3128  0.00183
+   E19    5030       -       -       -       -       -       ✓       -       ✓       -     342  0.00003
+   E20    5008       ✓       ✓       ✓       -       -       ✓       -       ✓       -     301  0.00003
+   E21    5010       -       -       -       -       -       ✓       -       -       -     305  0.00003
+   E22    5011       -       -       -       -       -       ✓       -       -       -     315  0.00003
+   E30    5012       ✓       ✓       ✓       -       -       ✓       -       ✓       -     356  0.00003
+   E31    5012       ✓       ✓       ✓       ✓       ✓       -       ✓       ✓       ✓    2415  0.00139
+   E32    5012       ✓       ✓       ✓       -       -       ✓       -       ✓       -     322  0.00003
+
+Failures:
+  E15-ava-already-refunded guard_passed: expected (always checked), got —
+
+Cases passed: 24/25 (96.0%); minimum 90%
+Per check: recommendation 22/22 · reason_code 22/22 · tier 22/22 · fee_date 16/16 · language 16/16 · case_status 17/17 · guard_passed 15/16 · no_internal_terms 23/23 · amount_matches_ledger 16/16
+Latency: avg 1.8 s · max 3.1 s
+Cost: avg $0.00107 per case · total $0.0267
+Baseline (every model step priced as claude-sonnet-5-5, same tokens; an estimate): $0.1461 → savings 82%

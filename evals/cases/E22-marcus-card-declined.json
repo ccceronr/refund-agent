@@ -1,0 +1,9 @@
+{
+  "id": "E22-marcus-card-declined",
+  "description": "Card declined → not a refund request",
+  "conversation_id": 5011,
+  "message_override": null,
+  "expected": {
+    "case_status": "not_refund"
+  }
+}

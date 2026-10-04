@@ -1,0 +1,16 @@
+{
+  "id": "E02-daniel-auto",
+  "description": "Same-day direct deposit, no prior refunds → refunded automatically",
+  "conversation_id": 5013,
+  "message_override": null,
+  "expected": {
+    "recommendation": "REFUND",
+    "reason_code": "ELIGIBLE",
+    "tier": [
+      "AUTO"
+    ],
+    "fee_date": "2026-09-16",
+    "language": "en",
+    "case_status": "auto_resolved"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "E10-lucia-resolved-collections",
+  "description": "Debt in collections resolved → good standing → automatic refund",
+  "conversation_id": 5021,
+  "message_override": null,
+  "expected": {
+    "recommendation": "REFUND",
+    "reason_code": "ELIGIBLE",
+    "tier": [
+      "AUTO"
+    ],
+    "fee_date": "2026-09-22",
+    "language": "en",
+    "case_status": "auto_resolved"
+  }
+}

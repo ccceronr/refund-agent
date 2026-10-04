@@ -1,0 +1,90 @@
+{
+  "decider": [
+    {
+      "questions": [
+        "injection",
+        "intent",
+        "language",
+        "tone"
+      ],
+      "decisions": {
+        "answers": {
+          "intent": {
+            "type": "choice",
+            "choice": "fee_refund",
+            "probabilities": {
+              "fee_refund": 1.0,
+              "other_banking": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          },
+          "injection": {
+            "type": "noul",
+            "noul": 0.06
+          },
+          "language": {
+            "type": "choice",
+            "choice": "en",
+            "probabilities": {
+              "other": 0.0,
+              "es": 0.0,
+              "en": 1.0
+            },
+            "confidence": 1.0
+          },
+          "tone": {
+            "type": "choice",
+            "choice": "neutral",
+            "probabilities": {
+              "neutral": 0.93,
+              "friendly": 0.03,
+              "upset": 0.04
+            },
+            "confidence": 0.89
+          }
+        },
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "usage": {
+          "input_tokens": 648,
+          "output_tokens": 135,
+          "cache_read_tokens": 0,
+          "cache_write_tokens": 0
+        },
+        "cost_usd": "0.000027216",
+        "latency_ms": 215
+      }
+    },
+    {
+      "questions": [
+        "fee"
+      ],
+      "decisions": {
+        "answers": {
+          "fee": {
+            "type": "choice",
+            "choice": "unclear",
+            "probabilities": {
+              "fee_2": 0.13,
+              "unclear": 0.87,
+              "fee_1": 0.0
+            },
+            "confidence": 0.8
+          }
+        },
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "usage": {
+          "input_tokens": 491,
+          "output_tokens": 44,
+          "cache_read_tokens": 0,
+          "cache_write_tokens": 0
+        },
+        "cost_usd": "0.000020622",
+        "latency_ms": 231
+      }
+    }
+  ],
+  "writer": []
+}

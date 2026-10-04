@@ -1,0 +1,14 @@
+{
+  "id": "E16-lucas-no-fee",
+  "description": "No fee on the accounts → manual review",
+  "conversation_id": 5027,
+  "message_override": null,
+  "expected": {
+    "recommendation": "MANUAL",
+    "reason_code": "NO_FEE_FOUND",
+    "tier": [
+      "MANUAL"
+    ],
+    "case_status": "manual_review"
+  }
+}

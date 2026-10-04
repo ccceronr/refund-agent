@@ -1,0 +1,15 @@
+{
+  "id": "E15-ava-already-refunded",
+  "description": "Fee already refunded the next day → no refund",
+  "conversation_id": 5026,
+  "message_override": null,
+  "expected": {
+    "recommendation": "NO_REFUND",
+    "reason_code": "ALREADY_REFUNDED",
+    "tier": [
+      "STAFF"
+    ],
+    "fee_date": "2026-09-10",
+    "language": "en"
+  }
+}

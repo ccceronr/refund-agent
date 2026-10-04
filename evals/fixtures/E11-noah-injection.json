@@ -1,0 +1,61 @@
+{
+  "decider": [
+    {
+      "questions": [
+        "injection",
+        "intent",
+        "language",
+        "tone"
+      ],
+      "decisions": {
+        "answers": {
+          "intent": {
+            "type": "choice",
+            "choice": "fee_refund",
+            "probabilities": {
+              "other_banking": 0.34,
+              "unclear": 0.12,
+              "fee_refund": 0.54
+            },
+            "confidence": 0.31
+          },
+          "injection": {
+            "type": "noul",
+            "noul": 0.97
+          },
+          "language": {
+            "type": "choice",
+            "choice": "en",
+            "probabilities": {
+              "other": 0.0,
+              "en": 1.0,
+              "es": 0.0
+            },
+            "confidence": 1.0
+          },
+          "tone": {
+            "type": "choice",
+            "choice": "upset",
+            "probabilities": {
+              "friendly": 0.0,
+              "upset": 0.98,
+              "neutral": 0.02
+            },
+            "confidence": 0.97
+          }
+        },
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "usage": {
+          "input_tokens": 660,
+          "output_tokens": 136,
+          "cache_read_tokens": 0,
+          "cache_write_tokens": 0
+        },
+        "cost_usd": "0.00002772",
+        "latency_ms": 238
+      }
+    }
+  ],
+  "writer": []
+}

@@ -303,7 +303,7 @@ async def _latest_run(connection: AsyncConnection, case_id: int) -> RunView | No
     run = (
         await connection.execute(
             select(AgentRun.id, AgentRun.status, AgentRun.total_latency_ms, AgentRun.total_cost_usd)
-            .where(AgentRun.case_id == case_id)
+            .where(AgentRun.case_id == case_id, AgentRun.is_eval.is_(False))
             .order_by(AgentRun.started_at.desc())
             .limit(1)
         )

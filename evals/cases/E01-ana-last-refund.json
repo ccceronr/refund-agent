@@ -1,0 +1,16 @@
+{
+  "id": "E01-ana-last-refund",
+  "description": "Same-day paycheck, last refund available → Luis approves",
+  "conversation_id": 5012,
+  "message_override": null,
+  "expected": {
+    "recommendation": "REFUND",
+    "reason_code": "ELIGIBLE",
+    "tier": [
+      "STAFF"
+    ],
+    "fee_date": "2026-09-14",
+    "language": "en",
+    "case_status": "ready"
+  }
+}

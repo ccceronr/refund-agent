@@ -46,14 +46,18 @@ jobs:
       - name: Install
         run: uv sync --project backend --locked
       - name: ruff
-        run: uv run --project backend ruff check backend tests
+        run: uv run --project backend ruff check backend tests evals
       - name: ruff format
-        run: uv run --project backend ruff format --check backend tests
+        run: uv run --project backend ruff format --check backend tests evals
       - name: mypy (strict)
         working-directory: backend
         run: uv run mypy
       - name: pytest
         run: uv run --project backend pytest
+      - name: evals (offline, replaying the recorded model answers; R-24)
+        env:
+          EVAL_DATABASE_ADMIN_URL: postgresql://postgres:ci-postgres@localhost:5432/refunds_eval
+        run: uv run --project backend python evals/run_evals.py --offline
       - name: migrate (the same commands compose and Railway run)
         env:
           APP_ENV: local

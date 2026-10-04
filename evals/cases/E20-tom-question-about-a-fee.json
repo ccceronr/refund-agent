@@ -1,0 +1,14 @@
+{
+  "id": "E20-tom-question-about-a-fee",
+  "description": "A question about a fee is not a refund request; a person decides",
+  "conversation_id": 5008,
+  "message_override": null,
+  "expected": {
+    "recommendation": "MANUAL",
+    "reason_code": "INTENT_UNCLEAR",
+    "tier": [
+      "MANUAL"
+    ],
+    "case_status": "manual_review"
+  }
+}

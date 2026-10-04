@@ -24,7 +24,7 @@ from sqlalchemy.engine import make_url
 
 from app.core.config import Settings
 from app.core.logging import HANDLER_NAME, configure_logging
-from app.db.bootstrap_roles import RolePasswords, bootstrap_roles
+from app.db.bootstrap_roles import RolePasswords, bootstrap_roles, create_database_if_missing
 from app.main import create_app
 
 PRODUCTION_SECRETS: dict[str, Any] = {
@@ -51,23 +51,6 @@ def role_url(admin_url: str, role: str, password: str, driver: str) -> str:
     """Same server and database as the admin URL, logged in as another role."""
     url = make_url(admin_url).set(drivername=driver, username=role, password=password)
     return url.render_as_string(hide_password=False)
-
-
-async def _create_database_if_missing(admin_url: str) -> None:
-    url = make_url(admin_url)
-    maintenance = url.set(drivername="postgresql", database="postgres")
-    connection = await asyncpg.connect(maintenance.render_as_string(hide_password=False))
-    try:
-        exists = await connection.fetchval(
-            "SELECT 1 FROM pg_database WHERE datname = $1", url.database
-        )
-        if not exists:
-            statement = await connection.fetchval(
-                "SELECT format('CREATE DATABASE %I', $1::text)", url.database
-            )
-            await connection.execute(statement)
-    finally:
-        await connection.close()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -108,7 +91,7 @@ def role_passwords() -> RolePasswords:
 def admin_url(role_passwords: RolePasswords) -> str:
     """Superuser URL of the test database, with the roles already bootstrapped."""
     url = _required_env("TEST_DATABASE_ADMIN_URL")
-    asyncio.run(_create_database_if_missing(url))
+    asyncio.run(create_database_if_missing(url))
     asyncio.run(bootstrap_roles(url, role_passwords))
     return url
 

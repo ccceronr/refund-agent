@@ -1,0 +1,140 @@
+{
+  "decider": [
+    {
+      "questions": [
+        "injection",
+        "intent",
+        "language",
+        "tone"
+      ],
+      "decisions": {
+        "answers": {
+          "intent": {
+            "type": "choice",
+            "choice": "fee_refund",
+            "probabilities": {
+              "unclear": 0.01,
+              "fee_refund": 0.98,
+              "other_banking": 0.01
+            },
+            "confidence": 0.98
+          },
+          "injection": {
+            "type": "noul",
+            "noul": 0.08
+          },
+          "language": {
+            "type": "choice",
+            "choice": "es",
+            "probabilities": {
+              "other": 0.0,
+              "es": 1.0,
+              "en": 0.0
+            },
+            "confidence": 1.0
+          },
+          "tone": {
+            "type": "choice",
+            "choice": "upset",
+            "probabilities": {
+              "friendly": 0.0,
+              "neutral": 0.0,
+              "upset": 1.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "usage": {
+          "input_tokens": 667,
+          "output_tokens": 136,
+          "cache_read_tokens": 0,
+          "cache_write_tokens": 0
+        },
+        "cost_usd": "0.000028014",
+        "latency_ms": 352
+      }
+    },
+    {
+      "questions": [
+        "passage"
+      ],
+      "decisions": {
+        "answers": {
+          "passage": {
+            "type": "choice",
+            "choice": "p1",
+            "probabilities": {
+              "p5": 0.0,
+              "none": 0.0,
+              "p3": 0.0,
+              "p2": 0.0,
+              "p1": 1.0,
+              "p4": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "usage": {
+          "input_tokens": 551,
+          "output_tokens": 66,
+          "cache_read_tokens": 0,
+          "cache_write_tokens": 0
+        },
+        "cost_usd": "0.000023142",
+        "latency_ms": 630
+      }
+    },
+    {
+      "questions": [
+        "language",
+        "outcome"
+      ],
+      "decisions": {
+        "answers": {
+          "language": {
+            "type": "noul",
+            "noul": 0.99
+          },
+          "outcome": {
+            "type": "choice",
+            "choice": "refund_confirmed",
+            "probabilities": {
+              "refund_confirmed": 1.0,
+              "refund_denied": 0.0,
+              "other": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "usage": {
+          "input_tokens": 433,
+          "output_tokens": 63,
+          "cache_read_tokens": 0,
+          "cache_write_tokens": 0
+        },
+        "cost_usd": "0.000018186",
+        "latency_ms": 220
+      }
+    }
+  ],
+  "writer": [
+    {
+      "text": "Hola, Mateo:\n\nLamentamos mucho la molestia. Ya te reembolsamos la comisión por sobregiro de $35.00 del 26 de septiembre. El dinero está de nuevo en tu cuenta hoy.\n\nGracias por escribirnos.\n\nEquipo de atención al asociado de Riverbend Credit Union",
+      "model": "claude-sonnet-5-5",
+      "usage": {
+        "input_tokens": 184,
+        "output_tokens": 118,
+        "cache_read_tokens": 1082,
+        "cache_write_tokens": 0
+      },
+      "cost_usd": "0.0017644",
+      "latency_ms": 1701
+    }
+  ]
+}

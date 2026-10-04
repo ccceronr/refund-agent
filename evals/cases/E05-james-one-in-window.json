@@ -1,0 +1,16 @@
+{
+  "id": "E05-james-one-in-window",
+  "description": "One prior refund in the window, two outside → automatic refund",
+  "conversation_id": 5016,
+  "message_override": null,
+  "expected": {
+    "recommendation": "REFUND",
+    "reason_code": "ELIGIBLE",
+    "tier": [
+      "AUTO"
+    ],
+    "fee_date": "2026-09-19",
+    "language": "en",
+    "case_status": "auto_resolved"
+  }
+}

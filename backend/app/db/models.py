@@ -202,6 +202,8 @@ class AgentRun(Base):
     total_cost_usd: Mapped[Decimal] = mapped_column(USD_COST, server_default="0")
     total_latency_ms: Mapped[int] = mapped_column(Integer, server_default="0")
     request_id: Mapped[str | None] = mapped_column(String(128))
+    # Eval runs (seed-and-evals §3.2) never show in the UI or count toward run limits.
+    is_eval: Mapped[bool] = mapped_column(server_default="false")
 
 
 class AgentStep(Base):

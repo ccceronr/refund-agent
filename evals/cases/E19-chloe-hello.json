@@ -1,0 +1,12 @@
+{
+  "id": "E19-chloe-hello",
+  "description": "\"Hello?\" → intent unclear (or not a refund request)",
+  "conversation_id": 5030,
+  "message_override": null,
+  "expected": {
+    "case_status": [
+      "manual_review",
+      "not_refund"
+    ]
+  }
+}

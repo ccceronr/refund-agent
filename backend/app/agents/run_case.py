@@ -41,7 +41,7 @@ from app.rules.model import ReasonCode, Thresholds
 from app.rules.texts import manual_reason_text
 from app.services.finalize import DbFinalizer, DryRunFinalizer, Finalizer
 from app.services.refunds import RefundService
-from app.services.runs import DbRunStore, MemoryRunStore, RunStore
+from app.services.runs import DbRunStore, EvalRunStore, MemoryRunStore, RunStore
 
 FAILED_RUN_REASONS = frozenset(
     {ReasonCode.AI_UNAVAILABLE, ReasonCode.DATA_UNAVAILABLE, ReasonCode.TIMEOUT}
@@ -92,8 +92,11 @@ class CaseRunner:
             else DbRunStore(rw_engine, settings.max_runs_per_case_per_hour)
         )
 
-    async def run(self, case_id: int, request_id: str | None = None) -> RunResult:
-        return await self.execute(case_id, await self.claim(case_id, request_id))
+    async def run(
+        self, case_id: int, request_id: str | None = None, message_override: str | None = None
+    ) -> RunResult:
+        run_id = await self.claim(case_id, request_id)
+        return await self.execute(case_id, run_id, message_override)
 
     async def claim(self, case_id: int, request_id: str | None = None) -> uuid.UUID:
         """Marks the case as running. Raises before any work starts (404, 409, 429)."""
@@ -101,7 +104,9 @@ class CaseRunner:
         await self.store.start(case_id, run_id, request_id)
         return run_id
 
-    async def execute(self, case_id: int, run_id: uuid.UUID) -> RunResult:
+    async def execute(
+        self, case_id: int, run_id: uuid.UUID, message_override: str | None = None
+    ) -> RunResult:
         tracker = StepTracker(run_id, self._events, self.store)
         deps = FlowDeps(
             self._settings,
@@ -113,7 +118,8 @@ class CaseRunner:
             self.finalizer,
         )
         started = time.perf_counter()
-        state, error_code = await self._run_flow(deps, RunState(case_id=case_id, run_id=run_id))
+        first = RunState(case_id=case_id, run_id=run_id, message_override=message_override)
+        state, error_code = await self._run_flow(deps, first)
         if state.outcome is None:
             raise RuntimeError(f"run for case {case_id} ended without an outcome")
         await self.store.finish(
@@ -174,6 +180,23 @@ class CaseRunner:
             return
         # P6 replaces this payload with the full case detail (design §4.4).
         await self._events.emit("completed", {"case_id": case_id, "status": outcome.case_status})
+
+
+def eval_runner(
+    *,
+    settings: Settings,
+    ro_engine: AsyncEngine,
+    rw_engine: AsyncEngine,
+    decider: Decider,
+    writer: ReplyWriter,
+) -> CaseRunner:
+    """seed-and-evals §3.2: real flow, dry run (no proposal, refund, message or status
+    change), with its runs and steps saved and tagged `is_eval`."""
+    runner = CaseRunner(
+        settings=settings, ro_engine=ro_engine, rw_engine=None, decider=decider, writer=writer
+    )
+    runner.store = EvalRunStore(rw_engine)
+    return runner
 
 
 def flow_models(
