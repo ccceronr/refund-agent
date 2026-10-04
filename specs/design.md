@@ -518,10 +518,13 @@ unless `APP_ENV != production`.
   `npm run build` in `frontend/`; stage 2 (Python 3.12 slim) installs the backend with uv
   from `uv.lock`, copies `frontend/dist/` to `backend/app/static/` and runs as a non-root
   user. Compose uses the same image for `migrate` and `app`.
-- `healthcheckPath = "/api/health"`; pre-deploy command runs
+- `healthcheckPath = "/api/health"`; pre-deploy command `sh bin/pre-deploy.sh` runs
   `alembic upgrade head → seed --if-empty`, both as `app_rw` (seed only if the DB is
-  empty, so redeploys don't wipe decisions). Start: uvicorn on `$PORT` (verify in the
-  Railway docs which bind address public networking needs: `0.0.0.0` or `::`).
+  empty, so redeploys don't wipe decisions; it also stores the staff password hashes).
+  Start: uvicorn on `0.0.0.0:$PORT` (Railway docs, "Application failed to respond").
+- Database connections use `?ssl=require` (Railway's Postgres image is SSL-enabled;
+  OWASP A04), over the private network (`${{Postgres.PGHOST}}`).
+- Steps and the variable list: `docs/deploy-railway.md`.
 - Roles bootstrap: once, before the first deploy, from Camila's machine with
   `railway run` (§3.3). The `app` service has no `DATABASE_ADMIN_URL` and no Postgres
   superuser password: a compromised app cannot reach the superuser account.

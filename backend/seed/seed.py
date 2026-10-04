@@ -124,7 +124,8 @@ async def _set_staff_passwords(connection: AsyncConnection, passwords: StaffPass
     # Runs on every deploy (also with --if-empty), so changing a variable rotates a password.
     for username, password in passwords.by_username().items():
         if password is None:
-            log.warning("staff_sign_in_disabled", username=username)
+            # Local only (production refuses above): the stored hash, if any, is kept.
+            log.warning("staff_password_not_set", username=username, effect="hash unchanged")
             continue
         await connection.execute(
             update(Staff)
