@@ -1,13 +1,20 @@
 @import 'tailwindcss';
 
-/* Brand tokens (ui.md §1). Greys lean toward navy. */
+/* Brand tokens (ui.md §1): the four required colors, neutral greys that lean toward navy,
+   and the status colors. One sans family, as on blossom.net. */
 @theme {
-  --font-serif: 'Newsreader Variable', Georgia, serif;
   --font-sans: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
 
   --color-navy: #001d3d;
   --color-clay: #efeeed;
   --color-terracotta: #dc634b;
+  /* Terracotta for text: the brand terracotta is 3.54:1 on white, below AA for normal
+     text. This darker shade is 5.28:1 on white and 4.55:1 on clay (ui.md §1). The brand
+     terracotta stays for backgrounds, borders, icons and the selected item. */
+  --color-terracotta-text: #b8472f;
+  /* The light coral of blossom.net's link hover: decoration only (underlines), never text
+     (2.33:1 on white). */
+  --color-terracotta-light: #fd8973;
   --color-white: #ffffff;
   --color-success: #2f7d5b;
   --color-error: #b42318;
@@ -35,6 +42,50 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-terracotta);
   outline-offset: 2px;
+}
+
+/* Pill buttons with one set of states (hover, pressed, disabled) and a 40px target.
+   Disabled text stays readable (grey-600 on grey-100): it often says why it is disabled. */
+@utility button {
+  @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full px-5 font-medium whitespace-nowrap transition-colors duration-150 ease-out disabled:cursor-not-allowed;
+}
+
+@utility button-primary {
+  @apply button bg-navy text-white hover:bg-navy/90 active:bg-navy/80 disabled:bg-grey-100 disabled:text-grey-600;
+}
+
+@utility button-secondary {
+  @apply button border border-grey-300 bg-white text-navy hover:border-navy/40 hover:bg-grey-50 active:bg-grey-100 disabled:text-grey-500;
+}
+
+@utility button-quiet {
+  @apply button px-3 text-grey-600 hover:bg-navy/5 hover:text-navy active:bg-navy/10 disabled:text-grey-500;
+}
+
+/* A white card on the clay page: large radius and a hairline in navy instead of a shadow. */
+@utility card {
+  @apply rounded-2xl bg-white ring-1 ring-navy/8;
+}
+
+/* A small round tile that holds a section icon. */
+@utility icon-tile {
+  @apply flex size-9 shrink-0 items-center justify-center rounded-full;
+}
+
+@utility chip {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[13px] font-medium whitespace-nowrap;
+}
+
+@utility label {
+  @apply text-[13px] font-medium text-grey-600;
+}
+
+@utility skeleton {
+  @apply animate-pulse rounded-md bg-grey-200/70;
+}
+
+@utility field {
+  @apply w-full rounded-xl border border-grey-300 bg-white px-3.5 transition-colors duration-150 hover:border-grey-400 focus:border-navy;
 }
 
 @media (prefers-reduced-motion: reduce) {

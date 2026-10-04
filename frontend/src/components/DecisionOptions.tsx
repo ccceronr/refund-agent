@@ -17,14 +17,12 @@ export function DecisionOptions(props: DecisionOptionsProps) {
   if (choices.outcomes.length === 0) return null
   return (
     <fieldset className="space-y-3">
-      <legend className="text-xs font-semibold tracking-wide text-grey-500 uppercase">
-        Your decision
-      </legend>
-      <div className="flex flex-wrap gap-2">
+      <legend className="label">Your decision</legend>
+      <div className="grid grid-cols-2 gap-2">
         {choices.outcomes.map((option) => (
           <label
             key={option.outcome}
-            className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 has-checked:border-navy has-checked:bg-white has-disabled:cursor-not-allowed has-disabled:opacity-60 ${
+            className={`flex min-h-10 cursor-pointer items-center gap-2.5 rounded-xl border bg-white px-3.5 py-2 transition-colors duration-150 hover:border-grey-400 has-checked:border-navy has-checked:ring-1 has-checked:ring-navy has-focus-visible:outline-2 has-focus-visible:outline-terracotta has-disabled:cursor-not-allowed has-disabled:bg-grey-50 has-disabled:text-grey-600 ${
               option.outcome === outcome ? 'border-navy' : 'border-grey-300'
             }`}
           >
@@ -44,19 +42,19 @@ export function DecisionOptions(props: DecisionOptionsProps) {
       {choices.outcomes.map(
         (option) =>
           option.hint && (
-            <p key={option.outcome} className="text-sm text-grey-500">
+            <p key={option.outcome} className="text-sm text-grey-600">
               {option.hint}
             </p>
           ),
       )}
       {choices.needsFeePick && outcome === 'refund' && (
         <div>
-          <p className="text-sm text-grey-600">Which fee?</p>
-          <div className="mt-1 flex flex-col gap-1">
+          <p className="text-sm font-medium text-grey-700">Which fee?</p>
+          <div className="mt-1.5 flex flex-col gap-1.5">
             {feeChoices.map((fee) => (
               <label
                 key={fee.id}
-                className="flex cursor-pointer items-center gap-2"
+                className="flex min-h-10 cursor-pointer items-center gap-2.5 rounded-xl border border-grey-300 bg-white px-3.5 transition-colors duration-150 hover:border-grey-400 has-checked:border-navy has-checked:ring-1 has-checked:ring-navy has-focus-visible:outline-2 has-focus-visible:outline-terracotta"
               >
                 <input
                   type="radio"

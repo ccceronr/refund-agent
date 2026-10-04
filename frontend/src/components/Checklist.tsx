@@ -4,41 +4,42 @@ import type { Check } from '../api/types'
 
 export function Checklist({ checks }: { checks: Check[] }) {
   return (
-    <ul className="mt-5 space-y-2">
+    <ul className="space-y-2">
       {checks.map((check) => (
-        <li key={check.rule} className="flex gap-2.5">
+        <li key={check.rule} className="flex gap-2.5 text-[15px] leading-snug">
           <CheckMark check={check} />
-          <span>{check.text}</span>
+          <span className={check.ok && !check.warning ? '' : 'font-medium'}>
+            {check.text}
+          </span>
         </li>
       ))}
     </ul>
   )
 }
 
+const MARKS = {
+  failed: { icon: X, tile: 'bg-error/10 text-error', label: 'Not met:' },
+  warning: {
+    icon: TriangleAlert,
+    tile: 'bg-warning/12 text-warning',
+    label: 'Note:',
+  },
+  met: { icon: CheckIcon, tile: 'bg-success/12 text-success', label: 'Met:' },
+}
+
 function CheckMark({ check }: { check: Check }) {
-  if (!check.ok) {
-    return (
-      <>
-        <X aria-hidden className="mt-1 size-4 shrink-0 text-error" />
-        <span className="sr-only">Not met:</span>
-      </>
-    )
-  }
-  if (check.warning) {
-    return (
-      <>
-        <TriangleAlert
-          aria-hidden
-          className="mt-1 size-4 shrink-0 text-warning"
-        />
-        <span className="sr-only">Note:</span>
-      </>
-    )
-  }
+  const mark = !check.ok
+    ? MARKS.failed
+    : check.warning
+      ? MARKS.warning
+      : MARKS.met
+  const Icon = mark.icon
   return (
     <>
-      <CheckIcon aria-hidden className="mt-1 size-4 shrink-0 text-success" />
-      <span className="sr-only">Met:</span>
+      <span aria-hidden className={`icon-tile size-5 ${mark.tile}`}>
+        <Icon className="size-3" strokeWidth={3} />
+      </span>
+      <span className="sr-only">{mark.label}</span>
     </>
   )
 }

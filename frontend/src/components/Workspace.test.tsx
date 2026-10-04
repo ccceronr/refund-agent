@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 // The policy panel closes cleanly with the X and with Esc, and approving still works
 // afterwards (P7b bug: newer browsers return a Promise from scrollIntoView, and an effect
-// that returned it crashed the whole page when the panel closed).
+// that returned it crashed the whole page when the panel closed). Also: after a decision
+// the next ready case is one click away, and "Back to list" closes the case (ui.md §2.7).
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -24,6 +25,15 @@ const QUEUE: CaseListItem[] = [
     status: 'ready',
     status_label: 'Ready for you',
     received_at: '2026-09-15T08:12:44',
+    tier: 'STAFF',
+  },
+  {
+    id: 5017,
+    member_name: 'Sofia Ramirez',
+    topic: 'Overdraft fee refund',
+    status: 'ready',
+    status_label: 'Ready for you',
+    received_at: '2026-09-21T16:45:00',
     tier: 'STAFF',
   },
 ]
@@ -111,6 +121,12 @@ const fetchMock = vi.fn(
       return answer(DECIDED)
     if (url.endsWith('/api/cases')) return answer(QUEUE)
     if (url.endsWith('/api/cases/5012')) return answer(CASE)
+    if (url.endsWith('/api/cases/5017'))
+      return answer({
+        ...CASE,
+        id: 5017,
+        member: { ...CASE.member, name: 'Sofia Ramirez' },
+      })
     if (url.endsWith('/api/policies/fee-refund-policy')) return answer(POLICY)
     return new Response(null, { status: 404 })
   },
@@ -184,5 +200,49 @@ describe('the policy panel', () => {
     const caseColumn = screen.getByRole('main')
     expect(panel.parentElement).toBe(caseColumn.parentElement) // a column of the same grid
     expect(panel.className).not.toMatch(/\bfixed\b/)
+  })
+})
+
+describe('moving between cases', () => {
+  it('offers the next ready case after a decision and opens it', async () => {
+    const user = userEvent.setup()
+    renderWorkspace()
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Approve and send' }),
+    )
+    await user.click(await screen.findByRole('button', { name: 'Next case' }))
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /Sofia Ramirez/ }),
+    ).toBeTruthy()
+    expect(window.location.search).toBe('?case=5017')
+  })
+
+  it('goes back to the list and points at the oldest ready case', async () => {
+    const user = userEvent.setup()
+    renderWorkspace()
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Back to list' }),
+    )
+
+    expect(window.location.search).toBe('')
+    expect(
+      await screen.findByRole('button', { name: "Open Ana Ruiz's case" }),
+    ).toBeTruthy()
+  })
+
+  it('goes back to the overview from the left column', async () => {
+    const user = userEvent.setup()
+    renderWorkspace()
+    await screen.findByRole('heading', { level: 1, name: /Ana Ruiz/ })
+
+    await user.click(screen.getByRole('button', { name: 'Overview' }))
+
+    expect(window.location.search).toBe('')
+    expect(
+      await screen.findByRole('heading', { name: /here's what's waiting/ }),
+    ).toBeTruthy()
   })
 })

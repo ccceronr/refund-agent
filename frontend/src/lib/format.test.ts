@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatCharge,
   formatCost,
   formatDay,
   formatDuration,
   formatMoney,
   formatReceived,
+  formatSignedMoney,
+  initials,
   formatTime,
   relativeTime,
 } from './format'
@@ -55,5 +58,33 @@ describe('run figures', () => {
   it('shows tiny costs to the tenth of a cent', () => {
     expect(formatCost('0.003740578')).toBe('$0.004')
     expect(formatCost('0.000025')).toBe('<$0.001')
+  })
+})
+
+describe('formatSignedMoney', () => {
+  it('marks money coming in with a plus sign (ui.md §2.4)', () => {
+    expect(formatSignedMoney('1400.00')).toBe('+$1,400.00')
+  })
+
+  it('keeps the real minus sign for money going out', () => {
+    expect(formatSignedMoney('-35.00')).toBe('−$35.00')
+  })
+})
+
+describe('formatCharge', () => {
+  it('shows a fee as money going out', () => {
+    expect(formatCharge('35.00')).toBe('−$35.00')
+    expect(formatCharge('-35.00')).toBe('−$35.00')
+  })
+})
+
+describe('initials', () => {
+  it('takes the first letter of the first and last name', () => {
+    expect(initials('Ana Ruiz')).toBe('AR')
+    expect(initials('Mateo Gómez Díaz')).toBe('MD')
+  })
+
+  it('works with a single name', () => {
+    expect(initials('Luis')).toBe('L')
   })
 })

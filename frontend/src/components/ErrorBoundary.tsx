@@ -30,13 +30,13 @@ export class ErrorBoundary extends Component<
         role="alert"
         className="flex flex-col items-center gap-4 px-6 py-16 text-center"
       >
-        <p className="font-serif text-2xl">
+        <p className="text-2xl font-medium tracking-tight">
           Something went wrong. Reload the page.
         </p>
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="rounded-md bg-navy px-4 py-2 font-medium text-white hover:opacity-90"
+          className="button-primary"
         >
           Reload
         </button>

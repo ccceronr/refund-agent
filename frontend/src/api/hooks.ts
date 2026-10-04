@@ -43,9 +43,11 @@ export function useSignOut() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: () => apiPost<void>('/auth/logout'),
+    // Keep the "who am I" query itself (the app listens to it) and drop everything else.
+    // Clearing the whole cache detached the app from it, so the page stayed signed in.
     onSettled: () => {
-      client.clear()
       client.setQueryData(queryKeys.me, null)
+      client.removeQueries({ predicate: (query) => query.queryKey[0] !== 'me' })
     },
   })
 }

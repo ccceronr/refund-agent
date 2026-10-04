@@ -36,14 +36,14 @@ export function PolicyPanel({ quote, onClose }: PolicyPanelProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="flex flex-col border-t border-grey-200 bg-white lg:sticky lg:top-0 lg:h-[calc(100vh-57px)] lg:border-t-0 lg:border-l"
+      className="flex w-full shrink-0 flex-col bg-white lg:w-[400px] lg:border-l lg:border-navy/8"
     >
-      <div className="flex items-center justify-between border-b border-grey-100 px-6 py-4">
+      <div className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-grey-100 pr-3 pl-6">
         <h2
           id="policy-title"
           ref={heading}
           tabIndex={-1}
-          className="font-serif text-xl"
+          className="text-lg font-semibold"
         >
           {policy.data?.title ?? quote.document}
         </h2>
@@ -51,12 +51,12 @@ export function PolicyPanel({ quote, onClose }: PolicyPanelProps) {
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="rounded-md p-1 hover:bg-grey-100"
+          className="button-quiet size-10 px-0"
         >
           <X aria-hidden className="size-5" />
         </button>
       </div>
-      <ol className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
+      <ol className="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 py-5">
         {policy.error && (
           <p role="alert" className="text-error">
             {policy.error.message}
@@ -71,8 +71,8 @@ export function PolicyPanel({ quote, onClose }: PolicyPanelProps) {
               aria-current={quoted ? 'true' : undefined}
               className={
                 quoted
-                  ? 'rounded-md border-l-2 border-terracotta bg-terracotta/8 px-3 py-2'
-                  : 'px-3'
+                  ? 'rounded-xl border-l-[3px] border-terracotta bg-terracotta/10 px-4 py-3'
+                  : 'px-4'
               }
             >
               {passage.text}

@@ -14,12 +14,12 @@ export function RunProgress({ run, onRetry }: RunProgressProps) {
     <section
       aria-live="polite"
       aria-busy={run.phase === 'running'}
-      className="rounded-xl border border-grey-200 bg-white p-6 shadow-sm"
+      className="card p-5"
     >
-      <p className="text-xs font-semibold tracking-wide text-grey-500 uppercase">
+      <p className="label">
         {run.phase === 'failed' ? 'Not prepared' : 'Preparing this case'}
       </p>
-      <ol className="mt-3 space-y-1.5">
+      <ol className="mt-3 space-y-2">
         <AnimatePresence initial={false}>
           {run.steps.map((step) => (
             <motion.li
@@ -36,7 +36,7 @@ export function RunProgress({ run, onRetry }: RunProgressProps) {
                 {step.label}
               </span>
               {step.duration_ms !== null && (
-                <span className="ml-auto text-sm text-grey-400 tabular-nums">
+                <span className="ml-auto text-sm text-grey-600 tabular-nums">
                   {formatDuration(step.duration_ms)}
                 </span>
               )}
@@ -50,7 +50,7 @@ export function RunProgress({ run, onRetry }: RunProgressProps) {
           <button
             type="button"
             onClick={onRetry}
-            className="mt-3 rounded-md border border-grey-300 px-3 py-1.5 font-medium hover:bg-grey-50"
+            className="button-secondary mt-3"
           >
             Try again
           </button>
@@ -65,11 +65,11 @@ function StepIcon({ status }: { status: RunState['steps'][number]['status'] }) {
     return (
       <LoaderCircle
         aria-label="In progress"
-        className="size-4 animate-spin text-grey-500"
+        className="size-4 shrink-0 animate-spin text-grey-600"
       />
     )
   }
   if (status === 'failed')
-    return <X aria-label="Failed" className="size-4 text-error" />
-  return <Check aria-label="Done" className="size-4 text-success" />
+    return <X aria-label="Failed" className="size-4 shrink-0 text-error" />
+  return <Check aria-label="Done" className="size-4 shrink-0 text-success" />
 }

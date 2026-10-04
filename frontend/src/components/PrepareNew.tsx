@@ -13,13 +13,13 @@ export function PrepareNew({ count, state, onStart }: PrepareNewProps) {
   const running = state.phase === 'running'
   if (count === 0 && state.phase === 'idle') return null
   return (
-    <div className="border-b border-grey-200 px-6 py-3" aria-live="polite">
+    <div className="px-5 pt-2" aria-live="polite">
       {count > 0 && (
         <button
           type="button"
           onClick={onStart}
           disabled={running}
-          className="flex w-full items-center justify-center gap-2 rounded-md border border-grey-300 bg-white px-3 py-2 text-sm font-medium hover:border-navy disabled:cursor-wait disabled:text-grey-500"
+          className="button w-full bg-terracotta font-semibold text-navy hover:bg-terracotta/90 active:bg-terracotta/80 disabled:cursor-wait disabled:bg-white disabled:text-grey-600"
         >
           {running && (
             <LoaderCircle aria-hidden className="size-4 animate-spin" />
@@ -30,10 +30,19 @@ export function PrepareNew({ count, state, onStart }: PrepareNewProps) {
         </button>
       )}
       {running && state.current && (
-        <p className="mt-2 text-xs text-grey-500 tabular-nums">
-          Preparing {state.current.index} of {state.current.total} ·{' '}
-          {state.current.member_name}
-        </p>
+        <div className="mt-3">
+          {/* A native <progress>: accessible, and no inline styles under the strict CSP. */}
+          <progress
+            value={state.current.index}
+            max={state.current.total}
+            aria-label="Preparing new messages"
+            className="block h-1 w-full appearance-none overflow-hidden rounded-full bg-white [&::-moz-progress-bar]:bg-terracotta [&::-webkit-progress-bar]:bg-white [&::-webkit-progress-value]:bg-terracotta [&::-webkit-progress-value]:transition-all"
+          />
+          <p className="mt-1.5 text-xs text-grey-600 tabular-nums">
+            Preparing {state.current.index} of {state.current.total} ·{' '}
+            {state.current.member_name}
+          </p>
+        </div>
       )}
       {!running && state.summary && (
         <p

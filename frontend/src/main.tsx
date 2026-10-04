@@ -1,6 +1,5 @@
 import '@fontsource-variable/figtree'
-import '@fontsource-variable/newsreader'
-import '@fontsource-variable/newsreader/wght-italic.css'
+import '@fontsource-variable/figtree/wght-italic.css'
 import {
   QueryCache,
   QueryClient,

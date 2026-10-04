@@ -60,3 +60,48 @@ export function groupQueue(items: CaseListItem[], role: Role): QueueSection[] {
     }))
     .filter((section) => section.items.length > 0)
 }
+
+// The overview cards before a case is opened (ui.md §2): how many cases wait in each section.
+export function sectionCounts(
+  items: CaseListItem[],
+): Record<SectionKey, number> {
+  const counts: Record<SectionKey, number> = {
+    ready: 0,
+    new: 0,
+    review: 0,
+    supervisor: 0,
+    not_refund: 0,
+    done: 0,
+  }
+  for (const item of items) counts[sectionFor(item.status)] += 1
+  return counts
+}
+
+// "Next case" after a decision (ui.md §2.7): the oldest case that is quick to decide.
+// A supervisor sees the cases waiting for a supervisor first, as in the queue.
+const NEXT_SECTIONS: Record<Role, SectionKey[]> = {
+  staff: ['ready'],
+  supervisor: ['supervisor', 'ready'],
+}
+
+export function nextCase(
+  items: CaseListItem[],
+  currentId: number | null,
+  role: Role,
+): CaseListItem | null {
+  for (const key of NEXT_SECTIONS[role]) {
+    const found = items.find(
+      (item) => item.id !== currentId && sectionFor(item.status) === key,
+    )
+    if (found) return found
+  }
+  return null
+}
+
+// The section title already names most statuses; only the ones that share a section with
+// another status need their own label (ui.md §2.1).
+const NOTED_STATUSES = new Set<CaseStatus>(['running', 'auto_resolved'])
+
+export function queueNote(item: CaseListItem): string | null {
+  return NOTED_STATUSES.has(item.status) ? item.status_label : null
+}

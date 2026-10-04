@@ -24,6 +24,17 @@ export function formatMoney(amount: string): string {
   return `${negative ? MINUS : ''}$${grouped}.${cents.padEnd(2, '0').slice(0, 2)}`
 }
 
+// The day timeline shows the direction of every posting: "+$1,400.00", "−$35.00".
+export function formatSignedMoney(amount: string): string {
+  const formatted = formatMoney(amount)
+  return amount.startsWith('-') ? formatted : `+${formatted}`
+}
+
+// A fee is money taken from the member: always shown going out ("−$35.00").
+export function formatCharge(amount: string): string {
+  return formatMoney(amount.startsWith('-') ? amount : `-${amount}`)
+}
+
 // "2026-09-14" and naive "2026-09-15T08:12:44" are wall-clock times at the credit
 // union: read them as local times so they print exactly as stored.
 function toDate(iso: string): Date {
@@ -61,4 +72,12 @@ export function formatCost(usd: string): string {
   const value = Number(usd)
   if (value < SMALLEST_COST_SHOWN) return `<$${SMALLEST_COST_SHOWN}`
   return `$${value.toFixed(3)}`
+}
+
+// The member's initials for the avatar next to the name: first and last name.
+export function initials(name: string): string {
+  const words = name.trim().split(/\s+/)
+  const first = words[0]?.[0] ?? ''
+  const last = words.length > 1 ? (words[words.length - 1]?.[0] ?? '') : ''
+  return (first + last).toUpperCase()
 }

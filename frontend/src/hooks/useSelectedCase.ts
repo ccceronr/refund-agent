@@ -9,7 +9,14 @@ function readCaseId(): number | null {
   return raw !== null && Number.isInteger(id) && id > 0 ? id : null
 }
 
-export function useSelectedCase(): [number | null, (id: number) => void] {
+interface SelectedCase {
+  caseId: number | null
+  select: (id: number) => void
+  // On a narrow screen the list and the case take turns: this goes back to the list.
+  clear: () => void
+}
+
+export function useSelectedCase(): SelectedCase {
   const [caseId, setCaseId] = useState(readCaseId)
 
   useEffect(() => {
@@ -25,5 +32,12 @@ export function useSelectedCase(): [number | null, (id: number) => void] {
     setCaseId(id)
   }, [])
 
-  return [caseId, select]
+  const clear = useCallback(() => {
+    const url = new URL(window.location.href)
+    url.searchParams.delete(PARAM)
+    window.history.pushState(null, '', url)
+    setCaseId(null)
+  }, [])
+
+  return { caseId, select, clear }
 }
