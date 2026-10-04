@@ -1,8 +1,10 @@
 // The queue (ui.md §2.1): grouped sections, oldest waiting first, selected item marked.
 import { useCases } from '../api/hooks'
+import { usePrepareNew } from '../hooks/usePrepareNew'
 import type { CaseListItem, Role } from '../api/types'
 import { relativeTime } from '../lib/format'
 import { groupQueue } from '../lib/queue'
+import { PrepareNew } from './PrepareNew'
 
 interface QueueProps {
   role: Role
@@ -12,12 +14,16 @@ interface QueueProps {
 
 export function Queue({ role, selectedId, onSelect }: QueueProps) {
   const cases = useCases()
+  const [prepare, startPrepare] = usePrepareNew()
+  const newCount =
+    cases.data?.filter((item) => item.status === 'new').length ?? 0
 
   return (
     <nav
       aria-label="Conversations"
       className="border-b border-grey-200 lg:h-[calc(100vh-57px)] lg:overflow-y-auto lg:border-r lg:border-b-0"
     >
+      <PrepareNew count={newCount} state={prepare} onStart={startPrepare} />
       {cases.isPending && (
         <p className="p-6 text-grey-500">Loading conversations…</p>
       )}

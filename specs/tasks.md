@@ -184,6 +184,12 @@ Send you any failing build/deploy log (paste the log, never secrets).
   vectors), how to run tests and evals, eval results, what I'd do next.
   Known limitations to state: the seed has no original fee rows for prior refunds (like the
   PDF); with full history, `identify_fee` should prefer fees that are not yet refunded.
+  In production the agent runs when each message arrives (the demo prepares new cases on
+  open or with "Prepare new messages", R-03). Login throttling lives in memory (one
+  process); session cookies can't be revoked server-side before they expire (SSO in
+  production).
+  Under A02: the CSP stays strict (no `'unsafe-inline'` anywhere): the policy side panel
+  and the reject form are non-modal components, so nothing injects inline styles.
 - `docs/diagrams/system-design.md`: Mermaid, one simple diagram: browser → Railway
   (`app`: FastAPI serving the API and the SPA; Postgres) → Anthropic/TypeSafe, GitHub
   Actions; plus the "at scale" note (design §1). Export PNG too.

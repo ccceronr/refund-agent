@@ -33,6 +33,7 @@ from app.agents.proposal import build_plan
 from app.agents.questions import Question
 from app.agents.state import Exit, FinalOutcome, RunState
 from app.agents.steps import EventSink, NullSink, StepRecord, StepTracker
+from app.core.clock import LocalClock
 from app.core.config import Settings
 from app.core.logging import configure_logging, error_trace
 from app.db.engines import create_ro_engine, create_rw_engine
@@ -75,10 +76,15 @@ class CaseRunner:
         self._decider = decider
         self._writer = writer
         self._events = events or NullSink()
+        clock = LocalClock(settings.local_timezone)
         self.finalizer: Finalizer = (
             DryRunFinalizer()
             if rw_engine is None
-            else DbFinalizer(rw_engine, RefundService(self._thresholds))
+            else DbFinalizer(
+                rw_engine,
+                RefundService(self._thresholds, today=clock.today),
+                clock,
+            )
         )
         self.store: RunStore = (
             MemoryRunStore()

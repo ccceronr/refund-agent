@@ -57,11 +57,16 @@ export function useCases() {
   })
 }
 
+const RUNNING_REFRESH_MS = 2000
+
 export function useCase(id: number | null) {
   return useQuery({
     queryKey: queryKeys.case(id ?? 0),
     queryFn: () => apiGet<CaseDetail>(`/cases/${id}`),
     enabled: id !== null,
+    // Prepared elsewhere (another tab, "Prepare new messages"): check back until it's done.
+    refetchInterval: (query) =>
+      query.state.data?.status === 'running' ? RUNNING_REFRESH_MS : false,
   })
 }
 

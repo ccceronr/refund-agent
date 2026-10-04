@@ -42,6 +42,7 @@ ignore = ["N818"]
 "tests/backend/api/test_decisions.py" = ["E501"]
 "tests/backend/api/test_cases_api.py" = ["E501"]
 "tests/backend/api/test_policies_api.py" = ["E501"]
+"tests/backend/api/test_prepare_new.py" = ["E501"]
 "tests/backend/services/*.py" = ["E501"]
 
 [lint.pylint]

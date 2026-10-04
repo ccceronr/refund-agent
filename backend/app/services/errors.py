@@ -51,3 +51,7 @@ class TooManyAttempts(PermissionError):
 
 class PolicyNotFound(LookupError):
     pass
+
+
+class PreparationInProgress(RuntimeError):
+    """A "Prepare new messages" batch is already running (409)."""

@@ -22,6 +22,7 @@ from app.services.errors import (
     InvalidDecision,
     NoFeeIdentified,
     PolicyNotFound,
+    PreparationInProgress,
     RunInProgress,
     RunLimitReached,
     TooManyAttempts,
@@ -61,6 +62,11 @@ _DOMAIN_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
         HTTPStatus.CONFLICT,
         "run_in_progress",
         "This case is being prepared right now.",
+    ),
+    PreparationInProgress: (
+        HTTPStatus.CONFLICT,
+        "preparation_in_progress",
+        "New messages are already being prepared.",
     ),
     CaseAlreadyDecided: (
         HTTPStatus.CONFLICT,

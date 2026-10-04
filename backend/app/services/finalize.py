@@ -6,7 +6,7 @@ automatic refund keeps the proposal for Luis at the STAFF tier (design §5.2).
 
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Protocol
 
 import structlog
@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from app.agents.proposal import ProposalPlan
 from app.agents.state import FinalOutcome
+from app.core.clock import LocalClock
 from app.db.models import Case, Conversation, Message, Proposal
 from app.rules.model import Role, Tier
 from app.services import audit
@@ -51,9 +52,10 @@ class DryRunFinalizer:
 
 
 class DbFinalizer:
-    def __init__(self, engine: AsyncEngine, refunds: RefundService) -> None:
+    def __init__(self, engine: AsyncEngine, refunds: RefundService, clock: LocalClock) -> None:
         self._engine = engine
         self._refunds = refunds
+        self._clock = clock
 
     async def finalize(self, case_id: int, run_id: uuid.UUID, plan: ProposalPlan) -> FinalOutcome:
         async with self._engine.begin() as connection:
@@ -68,7 +70,7 @@ class DbFinalizer:
                 tier, status = Tier.STAFF, "ready"
             proposal_id = await _insert_proposal(connection, case_id, run_id, plan, tier)
             if refunded:
-                await _send_reply(connection, case_id, plan.draft_reply or "")
+                await _send_reply(connection, case_id, plan.draft_reply or "", self._clock.now())
             await _update_case(connection, case_id, plan, status, proposal_id)
             await audit.record(
                 connection,
@@ -135,14 +137,16 @@ async def _insert_proposal(
     return proposal_id
 
 
-async def _send_reply(connection: AsyncConnection, case_id: int, body: str) -> None:
+async def _send_reply(
+    connection: AsyncConnection, case_id: int, body: str, sent_at: datetime
+) -> None:
     # BR-12: the reply becomes a message from the automatic flow and the conversation closes.
     await connection.execute(
         insert(Message).values(
             conversation_id=case_id,
             author_id=AUTOMATIC_REFUNDS.staff_id,
             body=body,
-            created_at=datetime.now(UTC).replace(tzinfo=None),
+            created_at=sent_at,
         )
     )
     await connection.execute(

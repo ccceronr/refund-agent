@@ -55,6 +55,10 @@ Accessible: WCAG AA contrast, keyboard navigable, visible focus, status not by c
   today** (includes "Refunded automatically"). Empty sections hidden.
 - Item: member name, topic, status label, relative time ("2 h ago"). Selected item has a
   terracotta left bar. Count per section.
+- When there are new cases, a quiet button at the top of the queue: **Prepare new messages
+  (18)**. While it runs it shows progress ("Preparing 3 of 18 · Daniel Kim") and each case
+  moves to its section as it finishes; at the end the queue refreshes ("17 prepared,
+  1 skipped"). Opening a new case still prepares it right away (§2.8).
 - Supervisor view (signed in as Marta): "Needs a supervisor" section first.
 
 ### 2.2 Case header
@@ -68,8 +72,8 @@ Member name, topic, received time, credit union (small, grey).
   "Done — the $35.00 is back in Ana's account and the reply was sent." (AUTO).
 - **Checklist**: each rule check as a line with icon + plain sentence
   (✓ success, ✕ error, ! warning). Text comes from the API (`checks[].text`).
-- **Policy quote**: italic quote + document title. Click → shows full document in a side
-  sheet with the passage highlighted.
+- **Policy quote**: italic quote + document title. Click → shows the full document in a
+  side panel (non-modal, `Esc` closes it) with the passage highlighted.
 - For manual review: the reason sentence (BR-13) in place of the checklist, plus whatever
   evidence was found.
 
@@ -99,11 +103,16 @@ Quoted, with send time. Full thread if more than one message.
   or template reply; action `edit`. For `AMBIGUOUS_FEE`, Luis first picks the fee from the
   ones shown, by date and amount ("Overdraft fee · Mon, Sep 8 · $35.00"), never by ID. Other
   manual cases offer "Don't refund" only (BR-09 "Manual cases").
+- On a "Don't refund" proposal that a supervisor may override (BR-09 policy exceptions),
+  the same selector appears: "Refund $35.00" is enabled for a supervisor (primary action
+  "Refund and send") and disabled for staff with "Only a supervisor can make this
+  exception."
 
 ### 2.7 Actions (sticky bottom bar)
 - Primary (navy): **Approve and send** · **Send edited reply** · (supervisor needed and
   actor is staff → disabled with "Waiting for a supervisor").
-- Secondary: **Reject** → small dialog "What's wrong with this suggestion?" (required
+- Secondary: **Reject** → inline form under the bar (no modal, so the CSP stays strict)
+  "What's wrong with this suggestion?" (required
   reason, 1–500 chars) → confirm.
 - Confirmation is inline (no extra modal for approve): button shows a spinner, then a
   success state "Refunded and sent" with a subtle check animation; case moves to "Done
@@ -146,6 +155,6 @@ No sign-up, no password reset (demo users only).
   passwords in localStorage.
 - Selected case in the URL (`?case=5012`) so a refresh keeps context.
 - Components: `Queue`, `CaseHeader`, `RecommendationCard`, `Checklist`, `PolicyQuote`,
-  `EvidencePanel`, `DayTimeline`, `ReplyEditor`, `ActionBar`, `RunProgress`, `RejectDialog`.
+  `EvidencePanel`, `DayTimeline`, `ReplyEditor`, `ActionBar` (with the inline reject form), `RunProgress`, `PrepareNew`.
 - Vitest: formatting helpers (money, dates), status → section mapping, action bar state
   logic (which button for which tier/actor/edit state).

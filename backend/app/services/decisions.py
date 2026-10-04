@@ -7,13 +7,14 @@ commit together or not at all. The actor always comes from the session (OWASP A0
 
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any, Literal
 
 import structlog
 from sqlalchemy import Row, func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
+from app.core.clock import LocalClock
 from app.db.models import Case, Conversation, Decision, FeedbackEval, Message, Proposal
 from app.rules.model import ReasonCode, Recommendation
 from app.services import audit
@@ -75,9 +76,10 @@ class _Decided:
 
 
 class DecisionService:
-    def __init__(self, engine: AsyncEngine, refunds: RefundService) -> None:
+    def __init__(self, engine: AsyncEngine, refunds: RefundService, clock: LocalClock) -> None:
         self._engine = engine
         self._refunds = refunds
+        self._clock = clock
 
     async def decide(
         self, case_id: int, request: DecisionRequest, actor: Actor, idempotency_key: uuid.UUID
@@ -114,7 +116,7 @@ class DecisionService:
                 actor=actor,
                 idempotency_key=str(idempotency_key),
             )
-        status = await _apply(connection, case, plan, actor)
+        status = await _apply(connection, case, plan, actor, self._clock.now())
         response = {
             "case_id": case_id,
             "status": status,
@@ -245,7 +247,9 @@ def _fee_to_refund(request: DecisionRequest, case: Record, proposal: Record | No
     return fee_id
 
 
-async def _apply(connection: AsyncConnection, case: Record, plan: _Plan, actor: Actor) -> str:
+async def _apply(
+    connection: AsyncConnection, case: Record, plan: _Plan, actor: Actor, sent_at: datetime
+) -> str:
     """BR-12: a reply is sent and the case resolved; a rejection goes back to Luis."""
     if plan.reply is None:
         await _update_case(connection, case, "manual_review", ReasonCode.REJECTED_BY_STAFF.value)
@@ -255,7 +259,7 @@ async def _apply(connection: AsyncConnection, case: Record, plan: _Plan, actor: 
             conversation_id=case.conversation_id,
             author_id=actor.staff_id,
             body=plan.reply,
-            created_at=datetime.now(UTC).replace(tzinfo=None),
+            created_at=sent_at,
         )
     )
     await connection.execute(

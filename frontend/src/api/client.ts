@@ -4,7 +4,7 @@
 export const NETWORK_ERROR =
   "We couldn't reach the server. Check your connection and try again."
 const GENERIC_ERROR = 'Something went wrong. Please try again.'
-const REQUESTED_WITH = { 'X-Requested-With': 'refund-app' }
+export const REQUESTED_WITH = { 'X-Requested-With': 'refund-app' }
 
 export class ApiError extends Error {
   readonly status: number
@@ -55,6 +55,11 @@ async function request<T>(path: string, init: RequestInit): Promise<T> {
   if (!response.ok) throw toApiError(response.status, body)
   // The backend validates every response with Pydantic models (design §4).
   return body as T
+}
+
+export async function readApiError(response: Response): Promise<ApiError> {
+  const body: unknown = await response.json().catch(() => null)
+  return toApiError(response.status, body)
 }
 
 function toApiError(status: number, body: unknown): ApiError {
