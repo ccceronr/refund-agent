@@ -43,8 +43,7 @@ timeouts. `make reset-db` reloads the demo data; `make help` lists every command
 ## How it works
 
 One Railway service (FastAPI serving the API **and** the built React app, one origin) and
-one Postgres. [System design](docs/diagrams/system-design.md) ·
-[Agent flow and prompts](docs/diagrams/agent-flow.md) · specs in [specs/](specs/).
+one Postgres. See the [diagrams](#diagrams) · specs in [specs/](specs/).
 
 - **A LangGraph flow** ([graph.py](backend/app/agents/graph.py)): load case → screen →
   gather evidence (4 read-only tools in parallel) → identify the fee → that day's postings →
@@ -64,6 +63,61 @@ one Postgres. [System design](docs/diagrams/system-design.md) ·
   per case), audits it. Used by the automatic tier and by staff decisions alike.
 - **Read-only agents**: every tool connects as `agent_ro` (SELECT only); only services write,
   as `app_rw`.
+
+## Diagrams
+
+Five diagrams in [docs/diagrams/](docs/diagrams/), made with
+[archify](https://github.com/tt-a1i/archify). The images are PNG exports
+([docs/diagrams/images/](docs/diagrams/images/)). Each diagram also has an interactive
+version, a single self-contained HTML file: open it in a browser (GitHub shows the HTML
+source, so clone or download it first). There every box has a **SRC** link to the code it
+describes, pinned to commit `0eaf7c9`, and the cards below the diagram add the details.
+
+### System overview
+
+Browser → Railway edge → the one `app` service (API + SPA, agent flow, rules engine,
+services, read-only tools) → Postgres through its two roles, `app_rw` and `agent_ro`; Jev
+and Anthropic. Interactive: [system-overview.html](docs/diagrams/system-overview.html).
+
+![System overview](docs/diagrams/images/system-overview.png)
+
+### Agent flow
+
+The 10 LangGraph steps as a staircase by stage, colored by who does the work (reads
+Postgres, asks a model, a gate in code, writes); the early exit from screening; where the
+case lands: Luis's queue or refunded automatically.
+Interactive: [agent-flow.html](docs/diagrams/agent-flow.html).
+
+![Agent flow](docs/diagrams/images/agent-flow.png)
+
+### Luis opens a case and approves a refund
+
+Sequence: the run streamed over SSE, then the decision in one transaction (Idempotency-Key,
+row lock on the case, rules re-checked, amount from the ledger).
+Interactive: [decide-case.html](docs/diagrams/decide-case.html).
+
+![Luis opens a case and approves a refund](docs/diagrams/images/decide-case.png)
+
+### Case status lifecycle
+
+The 8 case statuses and how a case moves between them, from `new` to `resolved` or
+`auto_resolved`. Interactive: [case-status.html](docs/diagrams/case-status.html).
+
+![Case status lifecycle](docs/diagrams/images/case-status.png)
+
+### What each model sees
+
+One row per model call: what code takes from Postgres, what reaches Jev or Sonnet, and what
+never does (IDs, account numbers). Interactive:
+[model-inputs.html](docs/diagrams/model-inputs.html).
+
+![What each model sees](docs/diagrams/images/model-inputs.png)
+
+### Earlier versions
+
+The earlier Mermaid diagrams render directly on GitHub:
+[system design](docs/diagrams/system-design.md) and [agent flow](docs/diagrams/agent-flow.md),
+which also lists the Jev questions and the writer prompt generated from the code.
 
 ## Decisions and trade-offs
 

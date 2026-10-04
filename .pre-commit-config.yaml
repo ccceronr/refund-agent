@@ -8,10 +8,14 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: check-merge-conflict
+      # The archify diagrams are generated: self-contained HTML (~770 KB each, viewer inlined)
+      # and their full-resolution PNG exports. Kept as generated, so these hooks skip them.
       - id: check-added-large-files
+        exclude: ^docs/diagrams/(.*\.html|images/.*\.png)$
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: trailing-whitespace
+        exclude: ^docs/diagrams/.*\.html$
 
   # Secret scan of the staged changes (CLAUDE.md security checklist).
   - repo: https://github.com/gitleaks/gitleaks
