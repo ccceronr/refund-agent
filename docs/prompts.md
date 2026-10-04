@@ -1,46 +1,13 @@
-# Agent flow
+# Agent prompts, fallbacks and handoffs
+
+What the agent flow diagram ([agent-flow.html](diagrams/agent-flow.html),
+[image](diagrams/images/agent-flow.png)) doesn't spell out (design §7.4): every fallback,
+the two handoffs, the Jev questions and the writer system prompt.
 
 A **sequential pipeline** with one **parallel fan-out** (evidence), a **typed decision
 layer** (Jev, with Haiku as fallback) and a **deterministic supervisor** (the rules engine)
 that owns the outcome. Models only read and write text; the one write path is
-`RefundService`. Code: [graph.py](../../backend/app/agents/graph.py).
-
-```mermaid
-flowchart TD
-  start(["Case opened, or Prepare new messages"]) --> load["load_case<br/>conversation, member, credit union"]
-  load --> screen{{"screen · Jev<br/>intent · injection · language · tone"}}
-  screen -->|"injection ≥ 0.5"| manual
-  screen -->|"other request, conf ≥ 0.85"| notrefund(["Not a refund request"])
-  screen -->|"unclear or conf < 0.85"| manual
-  screen -->|"fee refund"| fan
-
-  subgraph fan["gather_evidence · 4 read-only tools in parallel (agent_ro)"]
-    accounts[member accounts]
-    candidates[fee candidates · 60 days]
-    standing[member standing]
-    history[refund history · 12 months]
-  end
-
-  fan -->|"0 fees"| manual
-  fan --> fee{{"identify_fee<br/>1 fee: deterministic · several: Jev picks"}}
-  fee -->|"unclear or conf < 0.85"| manual
-  fee --> day["day_postings<br/>the fee day in posting order"]
-  day --> rules[["evaluate_rules · deterministic supervisor<br/>BR-01…BR-07 → REFUND / NO_REFUND / MANUAL"]]
-  rules --> policy{{"find_policy<br/>full-text search, Jev picks the passage<br/>(fallback: top hit)"}}
-  policy --> draft["draft_reply · Sonnet<br/>code-built facts only"]
-  draft -->|"writer fails"| template["template reply"]
-  draft --> guard{{"guard_output<br/>amount · internal terms · length (code)<br/>language · outcome (Jev)"}}
-  guard -->|"fails"| template
-  guard --> finalize
-  template --> finalize
-  finalize[["finalize · tier (BR-08)"]]
-  finalize -->|"AUTO"| refund["RefundService.execute<br/>refund + reply + close"]
-  finalize -->|"STAFF / SUPERVISOR"| luis(["Handoff: ready for Luis / needs a supervisor"])
-  finalize -->|"MANUAL"| manual(["Handoff: manual review, with the reason"])
-
-  jev[("Jev")] -.->|"fails after retries"| haiku[("Haiku: same questions,<br/>never qualifies for AUTO")]
-  haiku -.->|"also fails"| manual
-```
+`RefundService`. Code: [graph.py](../backend/app/agents/graph.py).
 
 **Fallbacks and failures, all closed:** Jev → Haiku answers the same typed questions; both
 down → `AI_UNAVAILABLE`. A database or tool error → `DATA_UNAVAILABLE`. The whole run over
@@ -54,8 +21,8 @@ plain words and a neutral template reply.
 
 ## Jev questions and the writer prompt
 
-Generated from the code ([questions.py](../../backend/app/agents/questions.py),
-[writer.py](../../backend/app/agents/writer.py)).
+Generated from the code ([questions.py](../backend/app/agents/questions.py),
+[writer.py](../backend/app/agents/writer.py)).
 
 ### Screening (one request: intent, injection, language, tone)
 
@@ -210,6 +177,3 @@ Ya te reembolsamos la comisión por sobregiro de $35.00 del 10 de agosto. El din
 Equipo de atención al asociado de Example Credit Union
 </example>
 ```
-
-
-![Agent flow](agent-flow.png)

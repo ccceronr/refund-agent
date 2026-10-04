@@ -89,6 +89,12 @@ Interactivo: [system-overview.html](docs/diagrams/system-overview.html).
 
 ![Vista general del sistema](docs/diagrams/images/system-overview.png)
 
+**A escala (no construido):** el mismo contenedor en **AWS ECS Fargate** detrás de un
+**ALB** y **CloudFront** (con caché de `/assets/*`), **RDS para PostgreSQL Multi-AZ**,
+**Secrets Manager** para las variables, **CloudWatch** para los logs en JSON y las alarmas,
+y **Amazon Bedrock** como otro endpoint para Claude. El agente correría cuando llega cada
+mensaje (una cola de conversaciones nuevas) en vez de cuando Luis abre un caso.
+
 ### Flujo del agente
 
 Los 10 pasos de LangGraph como una escalera por etapas, con color según quién hace el trabajo
@@ -121,12 +127,10 @@ Sonnet y qué nunca les llega (IDs, números de cuenta). Interactivo:
 
 ![Qué ve cada modelo](docs/diagrams/images/model-inputs.png)
 
-### Versiones anteriores
+### Prompts, fallbacks y traspasos
 
-Los diagramas Mermaid anteriores se ven directamente en GitHub:
-[diseño del sistema](docs/diagrams/system-design.md) y
-[flujo del agente](docs/diagrams/agent-flow.md), que además lista las preguntas a Jev y el
-prompt del writer generados desde el código.
+Las preguntas a Jev, el prompt de sistema del writer, cada fallback y los dos traspasos, en
+texto: [docs/prompts.md](docs/prompts.md).
 
 ## Decisiones y trade-offs
 

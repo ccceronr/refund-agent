@@ -85,7 +85,8 @@ evals/
 tests/
   backend/                pytest (unit: rules, tools; api: decision idempotency)
   e2e/                    Playwright
-docs/diagrams/            system-design.md, agent-flow.md (Mermaid)
+docs/diagrams/            archify diagrams: *.html (interactive) + images/*.png
+docs/prompts.md           Jev questions, writer prompt, fallbacks, handoffs (§7.4)
 specs/                    these specs
 Dockerfile  docker-compose.yml  .env.example  Makefile  .pre-commit-config.yaml
 .github/workflows/ci.yml  README.md  CLAUDE.md

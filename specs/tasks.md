@@ -198,11 +198,12 @@ Send you any failing build/deploy log (paste the log, never secrets).
   improving the system: a correct "already refunded" denial was read as a confirmation by
   the guard's outcome question, the draft was replaced by the template, and rewording the
   question ("now", design §7.5) fixed it with no regression.
-- `docs/diagrams/system-design.md`: Mermaid, one simple diagram: browser → Railway
-  (`app`: FastAPI serving the API and the SPA; Postgres) → Anthropic/TypeSafe, GitHub
-  Actions; plus the "at scale" note (design §1). Export PNG too.
-- `docs/diagrams/agent-flow.md`: Mermaid flow (design §5, §7.4) + the prompts and Jev
-  questions listed below it.
+- ~~`docs/diagrams/system-design.md`, `docs/diagrams/agent-flow.md` (Mermaid)~~: replaced at
+  Camila's request by five archify diagrams in `docs/diagrams/` (interactive HTML, PNG in
+  `images/`): system overview, agent flow, the decision sequence, the case status lifecycle
+  and what each model sees. The README shows each one, with the "at scale" note (design §1)
+  under the system overview; the Jev questions, the writer prompt, every fallback and the two
+  handoffs (design §7.4) moved to `docs/prompts.md`.
 - ~~`docs/demo-script.md`~~: removed at Camila's request; the video follows the README's
   demo walkthrough.
 - CI green. Fresh clone → `cp .env.example .env` → add keys → `docker compose up` works.

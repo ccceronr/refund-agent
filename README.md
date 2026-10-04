@@ -1,5 +1,7 @@
 # Fee refund agent
 
+*Versión en español: [README.es.md](README.es.md).*
+
 A credit union gets messages like *"My paycheck came the same day. Can you refund this
 fee?"*. This app prepares each one for the person who answers them (Luis): it reads the
 message, pulls the ledger, applies the refund policy, quotes it, drafts the reply and says
@@ -81,6 +83,12 @@ and Anthropic. Interactive: [system-overview.html](docs/diagrams/system-overview
 
 ![System overview](docs/diagrams/images/system-overview.png)
 
+**At scale (not built):** the same container on **AWS ECS Fargate** behind an **ALB** and
+**CloudFront** (caching `/assets/*`), **RDS for PostgreSQL Multi-AZ**, **Secrets Manager**
+for the variables, **CloudWatch** for the JSON logs and alarms, and **Amazon Bedrock** as an
+alternative Claude endpoint. The agent would run when each message arrives (a queue of new
+conversations) instead of when Luis opens a case.
+
 ### Agent flow
 
 The 10 LangGraph steps as a staircase by stage, colored by who does the work (reads
@@ -113,11 +121,10 @@ never does (IDs, account numbers). Interactive:
 
 ![What each model sees](docs/diagrams/images/model-inputs.png)
 
-### Earlier versions
+### Prompts, fallbacks and handoffs
 
-The earlier Mermaid diagrams render directly on GitHub:
-[system design](docs/diagrams/system-design.md) and [agent flow](docs/diagrams/agent-flow.md),
-which also lists the Jev questions and the writer prompt generated from the code.
+The Jev questions, the writer system prompt, every fallback and the two handoffs, as text:
+[docs/prompts.md](docs/prompts.md).
 
 ## Decisions and trade-offs
 
