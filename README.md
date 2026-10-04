@@ -15,17 +15,50 @@ for one click from Luis (or a supervisor), with the evidence on the same page.
 
 ## Run it locally (one command)
 
+You only need **git** and **Docker** (Docker Desktop, or Docker Engine with Compose v2).
+Python, Node and Postgres all run inside the containers.
+
+**1. Clone the repository**
+
 ```bash
-cp .env.example .env      # set the passwords and the two API keys (Anthropic, TypeSafe/Jev)
-docker compose up         # db → roles + migrations + seed → app on http://localhost:8000
+git clone https://github.com/ccceronr/refund-agent.git
+cd refund-agent
 ```
 
-`.env.example` documents every variable. The ones you must fill in: `POSTGRES_PASSWORD`,
-`APP_RW_PASSWORD`, `AGENT_RO_PASSWORD` (database roles), `SESSION_SECRET` (≥ 32 random
-characters), `SEED_PASSWORD_LUIS`, `SEED_PASSWORD_MARTA` (the demo users),
-`ANTHROPIC_API_KEY`, `JEV_API_KEY`. Everything else has a working default: models,
-business thresholds (`STAFF_APPROVAL_LIMIT`, `AUTO_REFUND_MAX_AMOUNT`, …), limits and
-timeouts. `make reset-db` reloads the demo data; `make help` lists every command.
+**2. Create your `.env`** from the example, then fill in these values in a text editor:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | What to put |
+|---|---|
+| `POSTGRES_PASSWORD`, `APP_RW_PASSWORD`, `AGENT_RO_PASSWORD` | Three passwords you make up for the database and its two roles. Use URL-safe values, e.g. from `python3 -c "import secrets; print(secrets.token_urlsafe(24))"` |
+| `SEED_PASSWORD_LUIS`, `SEED_PASSWORD_MARTA` | The passwords you'll sign in with as `luis` (staff) and `marta` (supervisor) |
+| `ANTHROPIC_API_KEY`, `JEV_API_KEY` | The model keys (Anthropic, and TypeSafe for Jev). Without them the app still runs, but no case can be prepared: each one ends in manual review |
+| `SESSION_SECRET` | Optional locally (≥ 32 random characters). If empty, sign-ins last until the app restarts |
+
+Everything else already has a working default: models, business thresholds
+(`STAFF_APPROVAL_LIMIT`, `AUTO_REFUND_MAX_AMOUNT`, …), limits and timeouts.
+
+**3. Run it**
+
+```bash
+docker compose up
+```
+
+That one command starts Postgres, creates the two database roles, runs the migrations,
+loads the demo data (22 cases) and starts the app. When the log shows
+`Application startup complete`, open **http://localhost:8000** and sign in as `luis` or
+`marta`.
+
+**Stop, reset, more**
+
+- Stop: `Ctrl+C`, or `docker compose down` (the data is kept).
+- Reload the demo data: `make reset-db` (or
+  `docker compose run --rm migrate python -m seed.seed --reset`).
+- Start from scratch, deleting the database: `docker compose down -v`.
+- `make help` lists every command (`make check`, `make test`, `make evals`, …).
 
 ## Demo walkthrough
 

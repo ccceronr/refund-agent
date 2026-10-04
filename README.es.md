@@ -14,17 +14,50 @@ con la evidencia en la misma página.
 
 ## Ejecutarlo en local (un comando)
 
+Solo necesitas **git** y **Docker** (Docker Desktop, o Docker Engine con Compose v2).
+Python, Node y Postgres corren dentro de los contenedores.
+
+**1. Clona el repositorio**
+
 ```bash
-cp .env.example .env      # define las contraseñas y las dos API keys (Anthropic, TypeSafe/Jev)
-docker compose up         # db → roles + migraciones + seed → app en http://localhost:8000
+git clone https://github.com/ccceronr/refund-agent.git
+cd refund-agent
 ```
 
-`.env.example` documenta cada variable. Las que debes completar: `POSTGRES_PASSWORD`,
-`APP_RW_PASSWORD`, `AGENT_RO_PASSWORD` (roles de la base de datos), `SESSION_SECRET` (≥ 32
-caracteres aleatorios), `SEED_PASSWORD_LUIS`, `SEED_PASSWORD_MARTA` (los usuarios de la demo),
-`ANTHROPIC_API_KEY`, `JEV_API_KEY`. Todo lo demás tiene un valor por defecto que funciona:
-modelos, umbrales de negocio (`STAFF_APPROVAL_LIMIT`, `AUTO_REFUND_MAX_AMOUNT`, …), límites y
-timeouts. `make reset-db` recarga los datos de la demo; `make help` lista todos los comandos.
+**2. Crea tu `.env`** a partir del ejemplo y completa estos valores con un editor de texto:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Qué poner |
+|---|---|
+| `POSTGRES_PASSWORD`, `APP_RW_PASSWORD`, `AGENT_RO_PASSWORD` | Tres contraseñas que inventes, para la base de datos y sus dos roles. Usa valores seguros para URL, por ejemplo de `python3 -c "import secrets; print(secrets.token_urlsafe(24))"` |
+| `SEED_PASSWORD_LUIS`, `SEED_PASSWORD_MARTA` | Las contraseñas con las que vas a entrar como `luis` (staff) y `marta` (supervisora) |
+| `ANTHROPIC_API_KEY`, `JEV_API_KEY` | Las claves de los modelos (Anthropic, y TypeSafe para Jev). Sin ellas la app funciona, pero ningún caso se puede preparar: todos terminan en revisión manual |
+| `SESSION_SECRET` | Opcional en local (≥ 32 caracteres aleatorios). Si queda vacío, la sesión dura hasta que la app se reinicia |
+
+Todo lo demás ya tiene un valor por defecto que funciona: modelos, umbrales de negocio
+(`STAFF_APPROVAL_LIMIT`, `AUTO_REFUND_MAX_AMOUNT`, …), límites y timeouts.
+
+**3. Ejecútalo**
+
+```bash
+docker compose up
+```
+
+Ese único comando levanta Postgres, crea los dos roles de la base, aplica las migraciones,
+carga los datos de la demo (22 casos) y arranca la app. Cuando el log muestre
+`Application startup complete`, abre **http://localhost:8000** y entra como `luis` o
+`marta`.
+
+**Detener, reiniciar y más**
+
+- Detener: `Ctrl+C`, o `docker compose down` (los datos se conservan).
+- Recargar los datos de la demo: `make reset-db` (o
+  `docker compose run --rm migrate python -m seed.seed --reset`).
+- Empezar de cero, borrando la base: `docker compose down -v`.
+- `make help` lista todos los comandos (`make check`, `make test`, `make evals`, …).
 
 ## Recorrido de la demo
 
