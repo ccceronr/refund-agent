@@ -21,10 +21,8 @@ in shell history: secrets go from a generator (or the clipboard) straight into R
    Rename the created service to `app`. Root directory: the repo root (default).
    The first build may fail until the variables exist: that's expected.
 2. In the project: **+ New** → **Database** → **PostgreSQL**. Keep the service name
-   `Postgres` (the variables below reference it by name). Railway's template defaults to
-   PostgreSQL **18**; the stack (and CI, compose) is **16**: set the service's source image
-   to `ghcr.io/railwayapp-templates/postgres-ssl:16` before it holds data (changing the
-   major version later means a new volume).
+   `Postgres` (the variables below reference it by name). Railway's template is
+   PostgreSQL **18**; compose and CI use 16. Production runs on 18 (design §11).
 3. `app` → **Settings** → **Deploy**, set these by hand (see "What we learned" below:
    Railway did not apply the `[deploy]` section of `railway.toml` on this project):
    - **Pre-deploy command**: `sh bin/pre-deploy.sh`
@@ -150,6 +148,22 @@ Checked on production (2026-10-03): `Strict-Transport-Security`, `Content-Securi
 with `?ssl=require`; Postgres has no public endpoint; logs carry `request_id` and no names,
 message text or account numbers (variable names only: `railway variable list --kv | cut -d= -f1`).
 
+## 7. Reset the demo data (before recording or sending)
+
+A one-time, audited reload of the seed, run by the pre-deploy inside Railway as `app_rw`
+(no admin URL, no Public Access, nothing in the app). The confirmation is the app's
+domain and **today's date in UTC**:
+
+```bash
+railway variable set "DEMO_RESET=app-production-6228.up.railway.app@$(date -u +%F)" --service app
+```
+
+Then press **Deploy**. The deployment logs show `demo_reset` with `outcome: reset`; the
+queue is back to the 22 new cases (the audit log keeps its history plus a `demo_reset`
+entry). A wrong domain or another day's date fails the pre-deploy and deletes nothing.
+The same value never resets twice (later deploys log `already_done`); delete the variable
+when done: `railway variable delete DEMO_RESET --service app`.
+
 ## What we learned
 
 - **SSH from WSL did not work.** `railway ssh` (and the SSH tunnel) needs an SSH key
@@ -167,5 +181,6 @@ message text or account numbers (variable names only: `railway variable list --k
   (step 1.3) is the reliable path. Railway now marks Config as Code as deprecated
   (`railway.toml` keeps working until 2026-12-01) in favour of Infrastructure as Code
   (`.railway/railway.ts`; preview with `railway config migrate`, a dry run by default).
-- **PostgreSQL 18 by default.** Railway's template ships 18; everything also works on 18
-  (checked locally: bootstrap, migrations, seed, startup recovery), but the stack is 16.
+- **PostgreSQL 18 by default.** Railway's template ships 18 and production stays on 18 (a
+  documented deviation from the stack's 16; design §11). Checked locally on 18: roles
+  bootstrap, migrations, seed and startup recovery all work.

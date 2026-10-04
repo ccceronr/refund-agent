@@ -82,6 +82,14 @@ TRUNCATE_ALL = text(
     " conversations, credit_unions RESTART IDENTITY CASCADE"
 )
 
+# The production demo reset (seed/reset_demo.py) keeps the audit trail: all but audit_log.
+TRUNCATE_DEMO_DATA = text(
+    "TRUNCATE TABLE feedback_evals, refund_actions, decisions, proposals, agent_steps,"
+    " agent_runs, cases, policy_passages, policy_documents, staff, member_flags,"
+    " member_profiles, transactions, sub_accounts, accounts, messages, conversations,"
+    " credit_unions RESTART IDENTITY CASCADE"
+)
+
 log = structlog.get_logger(__name__)
 
 
@@ -118,6 +126,14 @@ async def run_seed(settings: Settings, passwords: StaffPasswords, *, reset: bool
             await _set_staff_passwords(connection, passwords)
     finally:
         await engine.dispose()
+
+
+async def reload_demo_data(connection: AsyncConnection, passwords: StaffPasswords) -> None:
+    """Empties every table but audit_log and loads the seed again (seed/reset_demo.py)."""
+    await connection.execute(TRUNCATE_DEMO_DATA)
+    await _insert_everything(connection)
+    await _advance_id_sequences(connection)
+    await _set_staff_passwords(connection, passwords)
 
 
 async def _set_staff_passwords(connection: AsyncConnection, passwords: StaffPasswords) -> None:

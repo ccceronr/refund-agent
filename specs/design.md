@@ -525,6 +525,13 @@ unless `APP_ENV != production`.
 - Database connections use `?ssl=require` (Railway's Postgres image is SSL-enabled;
   OWASP A04), over the private network (`${{Postgres.PGHOST}}`).
 - Steps and the variable list: `docs/deploy-railway.md`.
+- **Deviation: PostgreSQL 18 in production.** Railway's Postgres template ships 18 (the
+  stack, compose and CI use 16). Kept on 18 after checking locally on 18: roles bootstrap,
+  migrations, seed and startup recovery all work.
+- Pre-deploy, health check and restart policy are set in the Railway dashboard: this
+  project did not apply the `[deploy]` section of `railway.toml` (kept as documentation).
+- Demo reset in production: `DEMO_RESET=<RAILWAY_PUBLIC_DOMAIN>@<today UTC>` makes the
+  pre-deploy reload the seed once, as `app_rw`, keeping the audit log (`seed/reset_demo.py`).
 - Roles bootstrap: once, before the first deploy, from Camila's machine with
   `railway run` (§3.3). The `app` service has no `DATABASE_ADMIN_URL` and no Postgres
   superuser password: a compromised app cannot reach the superuser account.

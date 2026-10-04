@@ -5,4 +5,6 @@
 # No roles bootstrap here: the app never holds the superuser URL (design §3.3).
 set -eu
 alembic upgrade head
+# Only with DEMO_RESET=<domain>@<today>: a one-time, audited reload of the demo data.
+python -m seed.reset_demo
 python -m seed.seed --if-empty
