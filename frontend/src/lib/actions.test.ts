@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CaseDetail, Proposal } from '../api/types'
-import { availableActions, type DraftState } from './actions'
+import { availableActions, canAskSupervisor, type DraftState } from './actions'
 
 function caseWith(
   status: CaseDetail['status'],
@@ -33,6 +33,7 @@ function caseWith(
     evidence: null,
     run: null,
     decision: null,
+    asked_by: null,
   }
 }
 
@@ -130,5 +131,50 @@ describe('availableActions', () => {
     expect(
       availableActions(caseWith('new', null), 'staff', UNCHANGED).primary,
     ).toBeNull()
+  })
+})
+
+// ui.md §2.7 "Ask a supervisor": staff sends a ready case to a supervisor, then waits.
+describe('a case sent to a supervisor', () => {
+  const sent = caseWith('needs_supervisor', {
+    recommendation: 'NO_REFUND',
+    reason_code: 'LIMIT_REACHED',
+  })
+
+  it('waits for a supervisor when staff opens it', () => {
+    expect(availableActions(sent, 'staff', UNCHANGED)).toEqual({
+      primary: {
+        kind: 'approve',
+        label: 'Waiting for a supervisor',
+        enabled: false,
+      },
+      canReject: true,
+    })
+  })
+
+  it('lets the supervisor decide it', () => {
+    expect(availableActions(sent, 'supervisor', UNCHANGED).primary).toEqual({
+      kind: 'approve',
+      label: 'Approve and send',
+      enabled: true,
+    })
+  })
+})
+
+describe('canAskSupervisor', () => {
+  it('offers staff to send a case that is ready for them', () => {
+    expect(canAskSupervisor(caseWith('ready', {}), 'staff')).toBe(true)
+  })
+
+  it('never offers it to a supervisor, who decides instead', () => {
+    expect(canAskSupervisor(caseWith('ready', {}), 'supervisor')).toBe(false)
+  })
+
+  it('offers it only while the case is ready with a suggestion', () => {
+    expect(canAskSupervisor(caseWith('needs_supervisor', {}), 'staff')).toBe(
+      false,
+    )
+    expect(canAskSupervisor(caseWith('manual_review', {}), 'staff')).toBe(false)
+    expect(canAskSupervisor(caseWith('ready', null), 'staff')).toBe(false)
   })
 })

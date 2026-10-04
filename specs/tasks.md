@@ -207,6 +207,9 @@ Send you any failing build/deploy log (paste the log, never secrets).
 - ~~`docs/demo-script.md`~~: removed at Camila's request; the video follows the README's
   demo walkthrough.
 - CI green. Fresh clone → `cp .env.example .env` → add keys → `docker compose up` works.
+- **Ask a supervisor** (Camila's request, after review): staff sends a "Ready for you" case
+  to "Needs a supervisor" (design §4.3a, ui.md §2.7); tests in
+  `tests/backend/api/test_escalations.py` and `frontend/src/lib/*.test.ts`.
 **👤 Camila:** record the demo video following the script; review the README and diagrams;
 make the repo accessible to the reviewers.
 **→ STOP**

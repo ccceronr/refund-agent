@@ -31,6 +31,8 @@ from app.services.auth import StaffMember
 from app.services.case_views import case_detail, done_since, list_cases
 from app.services.decisions import DecisionRequest
 from app.services.errors import PreparationInProgress
+from app.services.escalations import ask_supervisor
+from app.services.labels import status_label
 from app.services.refunds import Actor
 from app.services.view_models import CaseDetail, CaseListItem
 
@@ -57,6 +59,12 @@ class DecisionBody(BaseModel):
     reply_text: ReplyText | None = None
     reason: Reason | None = None
     fee_transaction_id: Annotated[int, Field(gt=0, le=MAX_ID)] | None = None
+
+
+class EscalationResponse(BaseModel):
+    case_id: int
+    status: str
+    status_label: str
 
 
 class DecisionResponse(BaseModel):
@@ -152,12 +160,19 @@ async def decide(
     return DecisionResponse(**response)
 
 
+async def escalate(case_id: CaseId, staff: CurrentStaff, engine: RwEngine) -> EscalationResponse:
+    """design §4.3a: staff sends a ready case to a supervisor. Safe to send twice."""
+    status = await ask_supervisor(engine, case_id, _actor(staff))
+    return EscalationResponse(case_id=case_id, status=status, status_label=status_label(status))
+
+
 router = APIRouter(prefix="/cases")
 router.add_api_route("", list_queue, methods=["GET"])
 router.add_api_route("/prepare-new", prepare_new, methods=["POST"])
 router.add_api_route("/{case_id}", get_case, methods=["GET"])
 router.add_api_route("/{case_id}/run", run_case, methods=["POST"])
 router.add_api_route("/{case_id}/decision", decide, methods=["POST"])
+router.add_api_route("/{case_id}/escalate", escalate, methods=["POST"])
 
 
 def _actor(staff: StaffMember) -> Actor:

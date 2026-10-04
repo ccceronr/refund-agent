@@ -28,6 +28,7 @@ from app.rules.texts import day, manual_reason_text, money
 from app.services import labels
 from app.services.auth import StaffMember
 from app.services.errors import CaseNotFound
+from app.services.escalations import WAITING, asked_by
 from app.services.view_models import (
     CaseDetail,
     CaseListItem,
@@ -80,6 +81,7 @@ async def list_cases(
             Proposal.tier,
             fee_description,
             received,
+            asked_by().label("asked_by"),
         )
         .join(Conversation, Conversation.id == Case.conversation_id)
         .join(MemberProfile, MemberProfile.member_id == Conversation.member_id)
@@ -106,6 +108,7 @@ def _list_item(row: Record) -> CaseListItem:
         status_label=labels.status_label(row.status),
         received_at=row.received_at,
         tier=row.tier,
+        asked_by=_while_waiting(row.status, row.asked_by),
     )
 
 
@@ -128,7 +131,13 @@ async def case_detail(
         evidence=_evidence_view(evidence, thresholds) if proposal else None,
         run=await _latest_run(connection, case_id),
         decision=await _latest_decision(connection, case_id),
+        asked_by=_while_waiting(head.status, head.asked_by),
     )
+
+
+def _while_waiting(status: str, who: str | None) -> str | None:
+    """Who sent the case to a supervisor matters only while it waits for one."""
+    return who if status == WAITING else None
 
 
 async def _case_head(connection: AsyncConnection, case_id: int) -> Record:
@@ -143,9 +152,11 @@ async def _case_head(connection: AsyncConnection, case_id: int) -> Record:
             MemberProfile.first_name,
             MemberProfile.last_name,
             _received_at().label("received_at"),
+            asked_by().label("asked_by"),
         )
         .join(Conversation, Conversation.id == Case.conversation_id)
         .join(MemberProfile, MemberProfile.member_id == Conversation.member_id)
+        .outerjoin(Proposal, Proposal.id == Case.current_proposal_id)
         .where(Case.conversation_id == case_id)
     )
     head = (await connection.execute(query)).first()

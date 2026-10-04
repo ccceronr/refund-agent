@@ -162,6 +162,10 @@ send time and the text; the member's messages tinted terracotta, the credit unio
   (§2.6), then the buttons, full width.
 - Primary (navy): **Approve and send** · **Send edited reply** · (supervisor needed and
   actor is staff → disabled with "Waiting for a supervisor").
+- Secondary, staff only, on a case "Ready for you": **Ask a supervisor** (design §4.3a) →
+  the case moves to "Needs a supervisor", where the queue item says "Asked by Luis" and
+  the decision card "Luis asked a supervisor to decide this."; Luis then sees "Waiting for
+  a supervisor". For a "Don't refund" that deserves a policy exception (BR-09).
 - Secondary: **Reject** → inline form under the buttons (no modal, so the CSP stays strict)
   "What's wrong with this suggestion?" (required
   reason, 1–500 chars) → confirm.

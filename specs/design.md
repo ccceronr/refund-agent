@@ -181,14 +181,16 @@ The app is public on Railway and moves money (even fake), so every endpoint exce
 | POST | `/cases/{id}/run` | Runs the flow. `Accept: text/event-stream` → SSE; otherwise JSON result. 409 if a run is in progress or the case is resolved |
 | POST | `/cases/prepare-new` | Runs every `new` case, one after another, on the server (R-03). SSE progress (§4.4). 409 while another batch runs. A case at its hourly run limit or already running is skipped, never retried |
 | POST | `/cases/{id}/decision` | Requires `Idempotency-Key` (UUID). Body below |
+| POST | `/cases/{id}/escalate` | Staff sends a `ready` case to a supervisor (§4.3a). No body |
 | POST | `/auth/login` · `/auth/logout` · GET `/auth/me` | §4.0 |
 
 ### 4.1 Case list item
 ```json
 { "id": 5012, "member_name": "Ana Ruiz", "topic": "Overdraft fee refund",
   "status": "ready", "status_label": "Ready for you", "received_at": "2026-09-15T08:12:44",
-  "tier": "STAFF" }
+  "tier": "STAFF", "asked_by": null }
 ```
+`asked_by`: who sent the case to a supervisor (first name), only while it waits (§4.3a).
 `topic` is derived from the proposal/category ("Overdraft fee refund", "Not a refund",
 or the conversation subject if not prepared).
 
@@ -245,6 +247,22 @@ there only.
 - Authority BR-09 → 403. Already decided with another key → 409. Same key → original
   response (stored in `decisions.response`), status 200.
 - Concurrency: row lock on `cases` (`SELECT … FOR UPDATE`) + `version` check.
+
+### 4.3a Ask a supervisor (POST `/cases/{id}/escalate`)
+Added at Camila's request (P10): staff can send a case that's `ready` for them to a
+supervisor, e.g. a "Don't refund" Luis thinks deserves a policy exception (BR-09).
+- Case `ready` → `needs_supervisor`, the supervisor's first section; no money moves and
+  nothing is sent. Response `{case_id, status, status_label}`, 200.
+- Staff only (a supervisor decides instead → 422); only from `ready` (else 422); decided
+  → 409; running → 409. Already waiting for a supervisor → 200, nothing changes.
+- Row lock on `cases`, as for decisions. Audit event `supervisor_asked` with
+  `{from_status}` only: who asked is the audit's actor; no free text, so there is no
+  reason field (R-35: audit details hold ids and codes).
+- While the case waits, the queue item and the case detail carry `asked_by` (the first
+  name, from that audit entry, if it is newer than the current proposal). A new run of the
+  flow sets the status again and ends the request.
+- Staff sees "Waiting for a supervisor" (and may still reject); the supervisor decides as
+  usual (§4.3).
 
 ### 4.4 SSE events (POST `/cases/{id}/run`)
 ```

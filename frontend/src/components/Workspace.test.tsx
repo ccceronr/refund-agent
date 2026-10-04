@@ -26,6 +26,7 @@ const QUEUE: CaseListItem[] = [
     status_label: 'Ready for you',
     received_at: '2026-09-15T08:12:44',
     tier: 'STAFF',
+    asked_by: null,
   },
   {
     id: 5017,
@@ -35,6 +36,7 @@ const QUEUE: CaseListItem[] = [
     status_label: 'Ready for you',
     received_at: '2026-09-21T16:45:00',
     tier: 'STAFF',
+    asked_by: null,
   },
 ]
 const CASE: CaseDetail = {
@@ -86,6 +88,7 @@ const CASE: CaseDetail = {
   evidence: null,
   run: { status: 'completed', duration_ms: 3000, cost_usd: '0.004', steps: [] },
   decision: null,
+  asked_by: null,
 }
 const POLICY: PolicyDocument = {
   slug: 'fee-refund-policy',

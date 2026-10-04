@@ -17,6 +17,7 @@ function item(id: number, status: CaseListItem['status']): CaseListItem {
     status_label: '',
     received_at: '2026-09-15T08:12:44',
     tier: null,
+    asked_by: null,
   }
 }
 
@@ -107,6 +108,13 @@ describe('queueNote', () => {
         status_label: 'Refunded automatically',
       }),
     ).toBe('Refunded automatically')
+  })
+
+  it('says who sent a case to a supervisor', () => {
+    expect(
+      queueNote({ ...item(1, 'needs_supervisor'), asked_by: 'Luis' }),
+    ).toBe('Asked by Luis')
+    expect(queueNote(item(1, 'needs_supervisor'))).toBeNull()
   })
 })
 

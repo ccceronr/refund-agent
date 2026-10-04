@@ -103,5 +103,6 @@ export function nextCase(
 const NOTED_STATUSES = new Set<CaseStatus>(['running', 'auto_resolved'])
 
 export function queueNote(item: CaseListItem): string | null {
+  if (item.asked_by) return `Asked by ${item.asked_by}` // sent to a supervisor (§2.7)
   return NOTED_STATUSES.has(item.status) ? item.status_label : null
 }

@@ -19,6 +19,9 @@ interface DecisionCardProps {
   result: DecisionResult | undefined
   onPrimary: () => void
   onReject: (reason: string) => void
+  canAskSupervisor: boolean
+  asking: boolean // sending the case to a supervisor
+  onAskSupervisor: () => void
   onNext: (() => void) | null
   children: ReactNode // the outcome and fee choices, when Luis has to pick
 }
@@ -26,7 +29,8 @@ interface DecisionCardProps {
 export function DecisionCard(props: DecisionCardProps) {
   const { detail, actions, pending, error, result, onPrimary } = props
   const [rejecting, setRejecting] = useState(false)
-  const canPrimary = actions.primary?.enabled === true && !pending && !rejecting
+  const canPrimary =
+    actions.primary?.enabled === true && !pending && !props.asking && !rejecting
   useApproveShortcut(canPrimary, onPrimary)
 
   return (
@@ -38,6 +42,11 @@ export function DecisionCard(props: DecisionCardProps) {
       {error && (
         <p role="alert" className="text-sm text-error">
           {error.message}
+        </p>
+      )}
+      {detail.asked_by && !result && (
+        <p className="text-sm text-grey-600">
+          {detail.asked_by} asked a supervisor to decide this.
         </p>
       )}
       {result ? (
@@ -91,7 +100,11 @@ function Buttons({
   rejecting,
   onPrimary,
   onStartReject,
+  canAskSupervisor,
+  asking,
+  onAskSupervisor,
 }: ButtonsProps) {
+  const busy = pending || asking
   const primary = actions.primary
   // The only approval that can't be clicked is the one waiting for a supervisor (BR-09).
   const locked = primary?.kind === 'approve' && !primary.enabled
@@ -112,10 +125,23 @@ function Buttons({
           {pending ? 'Sending…' : primary.label}
         </button>
       )}
+      {canAskSupervisor && !rejecting && (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onAskSupervisor}
+          className="button-secondary w-full"
+        >
+          {asking && (
+            <LoaderCircle aria-hidden className="size-4 animate-spin" />
+          )}
+          Ask a supervisor
+        </button>
+      )}
       {actions.canReject && !rejecting && (
         <button
           type="button"
-          disabled={pending}
+          disabled={busy}
           onClick={onStartReject}
           className="button-secondary w-full"
         >

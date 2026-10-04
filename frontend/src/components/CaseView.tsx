@@ -5,8 +5,9 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { useCase } from '../api/hooks'
 import type { CaseDetail, Proposal, Role } from '../api/types'
 import { useCaseRun } from '../hooks/useCaseRun'
+import { useAskSupervisor } from '../hooks/useAskSupervisor'
 import { useDecision } from '../hooks/useDecision'
-import { availableActions } from '../lib/actions'
+import { availableActions, canAskSupervisor } from '../lib/actions'
 import {
   decisionBody,
   decisionChoices,
@@ -130,6 +131,7 @@ function CaseContent({
 }: CaseContentProps) {
   const firstName = detail.member.name.split(' ')[0] ?? detail.member.name
   const decision = useDecision(detail.id)
+  const askSupervisor = useAskSupervisor(detail.id)
   const draft = useDraft(detail.proposal, role)
   const actions = availableActions(detail, role, draft.state)
   const proposal = progress ? null : detail.proposal
@@ -147,10 +149,13 @@ function CaseContent({
       detail={detail}
       actions={actions}
       pending={decision.isPending}
-      error={decision.error}
+      error={decision.error ?? askSupervisor.error}
       result={decision.result}
       onPrimary={submit}
       onReject={(reason) => decision.decide({ action: 'reject', reason })}
+      canAskSupervisor={canAskSupervisor(detail, role)}
+      asking={askSupervisor.isPending}
+      onAskSupervisor={askSupervisor.ask}
       onNext={onNext}
     >
       <DecisionOptions

@@ -30,6 +30,13 @@ export function availableActions(
 ): Actions {
   const proposal = detail.proposal
   if (!proposal || CLOSED.has(detail.status)) return NO_ACTIONS
+  // Sent to a supervisor (ui.md §2.7): staff waits, as for a supervisor-tier refund.
+  if (detail.status === 'needs_supervisor' && role !== 'supervisor') {
+    return {
+      primary: action('approve', 'Waiting for a supervisor', false),
+      canReject: true,
+    }
+  }
   if (proposal.recommendation === 'MANUAL')
     return { primary: manualAction(draft), canReject: false }
   if (proposal.tier === 'SUPERVISOR' && role !== 'supervisor') {
@@ -49,6 +56,13 @@ export function availableActions(
     ),
     canReject: true,
   }
+}
+
+// "Ask a supervisor" (ui.md §2.7): staff only, on a case ready for them with a suggestion.
+export function canAskSupervisor(detail: CaseDetail, role: Role): boolean {
+  return (
+    role === 'staff' && detail.status === 'ready' && detail.proposal !== null
+  )
 }
 
 function manualAction(draft: DraftState): PrimaryAction {

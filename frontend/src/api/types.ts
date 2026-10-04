@@ -28,6 +28,7 @@ export interface CaseListItem {
   status_label: string
   received_at: string
   tier: Tier | null
+  asked_by: string | null // who sent it to a supervisor, while it waits
 }
 
 export interface Member {
@@ -142,6 +143,7 @@ export interface CaseDetail {
   evidence: Evidence | null
   run: Run | null
   decision: DecisionSummary | null
+  asked_by: string | null // who sent it to a supervisor, while it waits
 }
 
 export interface PolicyDocument {

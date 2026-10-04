@@ -22,6 +22,7 @@ class CaseListItem(View):
     status_label: str
     received_at: datetime
     tier: str | None
+    asked_by: str | None  # who sent it to a supervisor, while it waits (ui.md §2.7)
 
 
 class MemberView(View):
@@ -149,3 +150,4 @@ class CaseDetail(View):
     evidence: EvidenceView | None
     run: RunView | None
     decision: DecisionView | None
+    asked_by: str | None  # who sent it to a supervisor, while it waits (ui.md §2.7)

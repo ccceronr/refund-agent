@@ -25,6 +25,7 @@ async def test_the_queue_lists_open_cases_oldest_first_in_plain_words(
     assert ana == {
         "id": 5012, "member_name": "Ana Ruiz", "topic": "Overdraft fee", "status": "new",
         "status_label": "Not prepared yet", "received_at": "2026-09-15T08:12:44", "tier": None,
+        "asked_by": None,
     }  # fmt: skip
     # R-01: a closed conversation shows only if decided in the last 24 h (5009: in August).
     assert 5009 not in {item["id"] for item in queue}
