@@ -1,0 +1,14 @@
+{
+  "id": "E12-emma-ambiguous-fee",
+  "description": "Two recent fees, message doesn't say which → manual review",
+  "conversation_id": 5023,
+  "message_override": null,
+  "expected": {
+    "recommendation": "MANUAL",
+    "reason_code": "AMBIGUOUS_FEE",
+    "tier": [
+      "MANUAL"
+    ],
+    "case_status": "manual_review"
+  }
+}

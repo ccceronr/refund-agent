@@ -71,7 +71,11 @@ class DbRunStore:
         count = await connection.scalar(
             select(func.count())
             .select_from(AgentRun)
-            .where(AgentRun.case_id == case_id, AgentRun.started_at >= func.now() - ONE_HOUR)
+            .where(
+                AgentRun.case_id == case_id,
+                AgentRun.started_at >= func.now() - ONE_HOUR,
+                AgentRun.is_eval.is_(False),
+            )
         )
         return count or 0
 
@@ -121,6 +125,28 @@ class DbRunStore:
             )
 
 
+class EvalRunStore(DbRunStore):
+    """Eval runs (seed-and-evals §3.2): runs and steps are saved, tagged `is_eval`, and the
+    case is never claimed or changed. The steps also stay in memory for the eval report."""
+
+    def __init__(self, engine: AsyncEngine) -> None:
+        super().__init__(engine, max_runs_per_hour=0)
+        self.steps: list[StepRecord] = []
+
+    async def start(self, case_id: int, run_id: uuid.UUID, request_id: str | None) -> None:
+        async with self._engine.begin() as connection:
+            await connection.execute(
+                insert(AgentRun).values(
+                    id=run_id, case_id=case_id, status="running", request_id=request_id,
+                    is_eval=True,
+                )
+            )  # fmt: skip
+
+    async def add_step(self, run_id: uuid.UUID, record: StepRecord) -> None:
+        self.steps.append(record)
+        await super().add_step(run_id, record)
+
+
 @dataclass
 class MemoryRunStore:
     """Dry runs (CLI, evals): nothing is written to the database."""
@@ -151,22 +177,19 @@ async def recover_interrupted_runs(engine: AsyncEngine) -> int:
     """At startup: a run left `running` died with the process (design §5.2) → TIMEOUT."""
     async with engine.begin() as connection:
         interrupted = (
-            (
-                await connection.execute(
-                    update(AgentRun)
-                    .where(AgentRun.status == "running")
-                    .values(
-                        status="failed",
-                        error_code=ReasonCode.TIMEOUT.value,
-                        finished_at=datetime.now(UTC),
-                    )
-                    .returning(AgentRun.case_id)
+            await connection.execute(
+                update(AgentRun)
+                .where(AgentRun.status == "running")
+                .values(
+                    status="failed",
+                    error_code=ReasonCode.TIMEOUT.value,
+                    finished_at=datetime.now(UTC),
                 )
+                .returning(AgentRun.case_id, AgentRun.is_eval)
             )
-            .scalars()
-            .all()
-        )
-        for case_id in set(interrupted):
+        ).all()
+        # An interrupted eval run never touched its case: only real runs reopen theirs.
+        for case_id in {row.case_id for row in interrupted if not row.is_eval}:
             await connection.execute(
                 update(Case)
                 .where(Case.conversation_id == case_id, Case.status == "running")

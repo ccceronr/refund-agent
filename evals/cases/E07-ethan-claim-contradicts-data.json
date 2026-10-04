@@ -1,0 +1,15 @@
+{
+  "id": "E07-ethan-claim-contradicts-data",
+  "description": "Member says same day, ledger says next day → no refund",
+  "conversation_id": 5018,
+  "message_override": null,
+  "expected": {
+    "recommendation": "NO_REFUND",
+    "reason_code": "NO_QUALIFYING_REASON",
+    "tier": [
+      "STAFF"
+    ],
+    "fee_date": "2026-09-21",
+    "language": "en"
+  }
+}

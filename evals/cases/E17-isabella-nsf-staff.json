@@ -1,0 +1,16 @@
+{
+  "id": "E17-isabella-nsf-staff",
+  "description": "Returned payment (NSF) fee qualifies but is never automatic",
+  "conversation_id": 5028,
+  "message_override": null,
+  "expected": {
+    "recommendation": "REFUND",
+    "reason_code": "ELIGIBLE",
+    "tier": [
+      "STAFF"
+    ],
+    "fee_date": "2026-09-25",
+    "language": "en",
+    "case_status": "ready"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "E14-mia-out-of-window",
+  "description": "Fee from July, 75 days before the request → out of window",
+  "conversation_id": 5025,
+  "message_override": null,
+  "expected": {
+    "recommendation": "NO_REFUND",
+    "reason_code": "OUT_OF_WINDOW",
+    "tier": [
+      "STAFF"
+    ],
+    "fee_date": "2026-07-10",
+    "language": "en"
+  }
+}

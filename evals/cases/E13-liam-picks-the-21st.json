@@ -1,0 +1,16 @@
+{
+  "id": "E13-liam-picks-the-21st",
+  "description": "Two fees, member names Monday the 21st → that fee, refund",
+  "conversation_id": 5024,
+  "message_override": null,
+  "expected": {
+    "recommendation": "REFUND",
+    "reason_code": "ELIGIBLE",
+    "tier": [
+      "STAFF",
+      "AUTO"
+    ],
+    "fee_date": "2026-09-21",
+    "language": "en"
+  }
+}

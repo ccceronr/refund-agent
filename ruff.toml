@@ -43,7 +43,10 @@ ignore = ["N818"]
 "tests/backend/api/test_cases_api.py" = ["E501"]
 "tests/backend/api/test_policies_api.py" = ["E501"]
 "tests/backend/api/test_prepare_new.py" = ["E501"]
+"tests/backend/evals/*.py" = ["E501"]
 "tests/backend/services/*.py" = ["E501"]
+# Eval CLIs: the report is their output; case tables read better on one line.
+"evals/*.py" = ["T201", "E501"]
 
 [lint.pylint]
 # Keyword-only parameters (`*, a, b`) read fine; six keeps signatures explicit.

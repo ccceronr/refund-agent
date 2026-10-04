@@ -1,0 +1,15 @@
+{
+  "id": "E09-henry-debt-in-collections",
+  "description": "Unresolved debt in collections → not in good standing",
+  "conversation_id": 5020,
+  "message_override": null,
+  "expected": {
+    "recommendation": "NO_REFUND",
+    "reason_code": "NOT_GOOD_STANDING",
+    "tier": [
+      "STAFF"
+    ],
+    "fee_date": "2026-09-21",
+    "language": "en"
+  }
+}

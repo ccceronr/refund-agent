@@ -8,7 +8,7 @@ APP_URL ?= http://localhost:8000
 # Backend tests use their own database (refunds_test) on the compose Postgres,
 # reached on the host port from .env (DB_HOST_PORT).
 
-.PHONY: help install hooks up down reset-db smoke-models real-runs check lint typecheck test test-backend test-frontend fmt health evals
+.PHONY: help install hooks up down reset-db smoke-models real-runs check lint typecheck test test-backend test-frontend fmt health evals export-feedback
 
 help: ## List the commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -38,8 +38,8 @@ real-runs: ## P4 smoke + P5 dry runs of 5012, 5013, 5022 (paid, real models; wri
 check: lint typecheck test ## Everything CI runs, except the audits and the image build
 
 lint: ## ruff, ruff format --check, eslint, prettier --check
-	$(BACKEND) ruff check backend tests
-	$(BACKEND) ruff format --check backend tests
+	$(BACKEND) ruff check backend tests evals
+	$(BACKEND) ruff format --check backend tests evals
 	$(FRONTEND) lint
 	$(FRONTEND) format:check
 
@@ -60,12 +60,21 @@ test-frontend: ## vitest
 	$(FRONTEND) test
 
 fmt: ## Format and auto-fix (ruff, prettier)
-	$(BACKEND) ruff format backend tests
-	$(BACKEND) ruff check --fix backend tests
+	$(BACKEND) ruff format backend tests evals
+	$(BACKEND) ruff check --fix backend tests evals
 	$(FRONTEND) format
 
 health: ## Ask the running app for its health
 	curl -fsS $(APP_URL)/api/health && echo
 
-evals: ## Run the eval set (P8; makes paid model calls)
-	$(BACKEND) python evals/run_evals.py
+evals: ## Eval set with real model calls (paid). ARGS="--record" | "--offline" | "--case E05"
+	@test -f .env || { echo "Create .env first: cp .env.example .env (then set the passwords)"; exit 1; }
+	docker compose up -d --wait db
+	set -a && source ./.env && set +a && \
+	EVAL_DATABASE_ADMIN_URL="postgresql://postgres:$${POSTGRES_PASSWORD}@127.0.0.1:$${DB_HOST_PORT:-54320}/refunds_eval" \
+	$(BACKEND) python evals/run_evals.py $(ARGS)
+
+export-feedback: ## Export staff feedback (R-23) to evals/cases/feedback/ for review
+	set -a && source ./.env && set +a && \
+	DATABASE_URL_RW="postgresql+asyncpg://app_rw:$${APP_RW_PASSWORD}@127.0.0.1:$${DB_HOST_PORT:-54320}/refunds" \
+	$(BACKEND) python evals/export_feedback.py

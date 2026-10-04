@@ -1,0 +1,15 @@
+{
+  "id": "E06-sofia-deposit-two-days-later",
+  "description": "Payroll two days after the fee → no qualifying reason",
+  "conversation_id": 5017,
+  "message_override": null,
+  "expected": {
+    "recommendation": "NO_REFUND",
+    "reason_code": "NO_QUALIFYING_REASON",
+    "tier": [
+      "STAFF"
+    ],
+    "fee_date": "2026-09-18",
+    "language": "en"
+  }
+}

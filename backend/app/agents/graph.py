@@ -41,7 +41,7 @@ from app.tools.queries import (
     search_policy,
 )
 from app.tools.recording import ToolRecorder
-from app.tools.schemas import CaseContext, FeeCandidate, LedgerTransaction
+from app.tools.schemas import CaseContext, FeeCandidate, LedgerTransaction, MemberMessage
 
 POLICY_PICK_MIN_CONFIDENCE = 0.6  # design §6.1
 
@@ -106,7 +106,7 @@ class Flow:
                 return {"exit": Exit("manual", ReasonCode.DATA_UNAVAILABLE)}
             finally:
                 step.add_tool_calls(recorder)
-            return {"case": case}
+            return {"case": _with_message(case, state.message_override)}
 
     async def screen(self, state: RunState) -> dict[str, Any]:
         case = _required(state.case)
@@ -392,6 +392,16 @@ class Flow:
         )
         language = state.screening.language if state.screening else "en"
         return render_template(key, language, context)
+
+
+def _with_message(case: CaseContext, message: str | None) -> CaseContext:
+    """Evals: replace the member's messages with one message sent at the same time."""
+    if message is None or not case.member_messages:
+        return case
+    last = case.member_messages[-1]
+    return case.model_copy(
+        update={"member_messages": [MemberMessage(body=message, sent_at=last.sent_at)]}
+    )
 
 
 def build_graph(deps: FlowDeps) -> CompiledStateGraph[RunState, Any, RunState, RunState]:

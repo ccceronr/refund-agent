@@ -79,6 +79,25 @@ async def bootstrap_roles(
         await connection.close()
 
 
+async def create_database_if_missing(admin_url: str) -> None:
+    """For the throwaway databases of tests and evals (refunds_test, refunds_eval)."""
+    url = make_url(admin_url)
+    maintenance = url.set(drivername="postgresql", database="postgres")
+    connection = await asyncpg.connect(maintenance.render_as_string(hide_password=False))
+    try:
+        exists = await connection.fetchval(
+            "SELECT 1 FROM pg_database WHERE datname = $1", url.database
+        )
+        if not exists:
+            # format('%I') quotes the name inside Postgres: never string-built SQL.
+            statement = await connection.fetchval(
+                "SELECT format('CREATE DATABASE %I', $1::text)", url.database
+            )
+            await connection.execute(statement)
+    finally:
+        await connection.close()
+
+
 def scram_sha256_verifier(password: str, salt: bytes, iterations: int = SCRAM_ITERATIONS) -> str:
     """The value Postgres stores for a SCRAM-SHA-256 password (RFC 5802, RFC 7677).
 

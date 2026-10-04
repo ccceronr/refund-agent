@@ -1,0 +1,16 @@
+{
+  "id": "E18-mateo-upset-spanish",
+  "description": "Upset message in Spanish, qualifies → automatic refund in Spanish",
+  "conversation_id": 5029,
+  "message_override": null,
+  "expected": {
+    "recommendation": "REFUND",
+    "reason_code": "ELIGIBLE",
+    "tier": [
+      "AUTO"
+    ],
+    "fee_date": "2026-09-26",
+    "language": "es",
+    "case_status": "auto_resolved"
+  }
+}

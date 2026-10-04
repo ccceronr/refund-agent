@@ -68,6 +68,8 @@ class RunState(BaseModel):
 
     case_id: int
     run_id: uuid.UUID
+    # Evals only (seed-and-evals §3.1): the same member data with a different message.
+    message_override: str | None = None
     case: CaseContext | None = None
     screening: Screening | None = None
     accounts: list[MemberAccount] = []
