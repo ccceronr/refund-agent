@@ -190,6 +190,11 @@ Send you any failing build/deploy log (paste the log, never secrets).
   production).
   Under A02: the CSP stays strict (no `'unsafe-inline'` anywhere): the policy side panel
   and the reject form are non-modal components, so nothing injects inline styles.
+  Evals: show both recorded runs (`evals/reports/run-1-before-guard-fix.txt`: 24/25, 96 %;
+  `run-2-after-guard-fix.txt`: the result after) and tell E15 as the example of evals
+  improving the system: a correct "already refunded" denial was read as a confirmation by
+  the guard's outcome question, the draft was replaced by the template, and rewording the
+  question ("now", design §7.5) fixed it with no regression.
 - `docs/diagrams/system-design.md`: Mermaid, one simple diagram: browser → Railway
   (`app`: FastAPI serving the API and the SPA; Postgres) → Anthropic/TypeSafe, GitHub
   Actions; plus the "at scale" note (design §1). Export PNG too.

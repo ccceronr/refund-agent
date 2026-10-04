@@ -41,7 +41,7 @@
               "friendly": 0.0,
               "upset": 0.96
             },
-            "confidence": 0.94
+            "confidence": 0.93
           }
         },
         "source": "jev",
@@ -53,7 +53,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.00002772",
-        "latency_ms": 211
+        "latency_ms": 217
       }
     },
     {
@@ -66,12 +66,12 @@
             "type": "choice",
             "choice": "p1",
             "probabilities": {
-              "p2": 0.0,
-              "none": 0.01,
               "p3": 0.0,
+              "none": 0.01,
               "p4": 0.0,
-              "p1": 0.99,
-              "p5": 0.0
+              "p5": 0.0,
+              "p2": 0.0,
+              "p1": 0.99
             },
             "confidence": 0.99
           }
@@ -85,7 +85,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000022554",
-        "latency_ms": 222
+        "latency_ms": 258
       }
     },
     {
@@ -97,15 +97,15 @@
         "answers": {
           "language": {
             "type": "noul",
-            "noul": 1.0
+            "noul": 0.99
           },
           "outcome": {
             "type": "choice",
             "choice": "refund_denied",
             "probabilities": {
               "refund_confirmed": 0.0,
-              "refund_denied": 1.0,
-              "other": 0.0
+              "other": 0.0,
+              "refund_denied": 1.0
             },
             "confidence": 1.0
           }
@@ -113,28 +113,28 @@
         "source": "jev",
         "model": "jev-1.13.0",
         "usage": {
-          "input_tokens": 439,
+          "input_tokens": 466,
           "output_tokens": 62,
           "cache_read_tokens": 0,
           "cache_write_tokens": 0
         },
-        "cost_usd": "0.000018438",
-        "latency_ms": 219
+        "cost_usd": "0.000019572",
+        "latency_ms": 205
       }
     }
   ],
   "writer": [
     {
-      "text": "Hi Ethan,\n\nI'm sorry this has been frustrating. We looked at the $35.00 overdraft fee from September 21, and no deposit arrived after the fee, so the order payments were processed that day didn't cause it. Because of that, we can't refund it. Is there anything else we can help you with?\n\nRiverbend Credit Union Member Support",
+      "text": "Hi Ethan,\n\nI'm sorry this has been frustrating. We looked at the $35.00 overdraft fee from September 21, and no deposit arrived after the fee that day, so the order payments were processed in didn't cause it. Because of that, we can't refund it. Is there anything else we can help you with?\n\nRiverbend Credit Union Member Support",
       "model": "claude-sonnet-5-5",
       "usage": {
         "input_tokens": 198,
-        "output_tokens": 115,
+        "output_tokens": 116,
         "cache_read_tokens": 1082,
         "cache_write_tokens": 0
       },
-      "cost_usd": "0.0017624",
-      "latency_ms": 1703
+      "cost_usd": "0.0017724",
+      "latency_ms": 1942
     }
   ]
 }

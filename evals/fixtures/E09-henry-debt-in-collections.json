@@ -9,6 +9,30 @@
       ],
       "decisions": {
         "answers": {
+          "injection": {
+            "type": "noul",
+            "noul": 0.07
+          },
+          "language": {
+            "type": "choice",
+            "choice": "en",
+            "probabilities": {
+              "en": 1.0,
+              "other": 0.0,
+              "es": 0.0
+            },
+            "confidence": 1.0
+          },
+          "tone": {
+            "type": "choice",
+            "choice": "neutral",
+            "probabilities": {
+              "upset": 0.15,
+              "friendly": 0.01,
+              "neutral": 0.84
+            },
+            "confidence": 0.76
+          },
           "intent": {
             "type": "choice",
             "choice": "fee_refund",
@@ -18,30 +42,6 @@
               "other_banking": 0.0
             },
             "confidence": 1.0
-          },
-          "injection": {
-            "type": "noul",
-            "noul": 0.08
-          },
-          "language": {
-            "type": "choice",
-            "choice": "en",
-            "probabilities": {
-              "en": 1.0,
-              "es": 0.0,
-              "other": 0.0
-            },
-            "confidence": 1.0
-          },
-          "tone": {
-            "type": "choice",
-            "choice": "neutral",
-            "probabilities": {
-              "friendly": 0.02,
-              "neutral": 0.82,
-              "upset": 0.16
-            },
-            "confidence": 0.74
           }
         },
         "source": "jev",
@@ -53,7 +53,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000027468",
-        "latency_ms": 225
+        "latency_ms": 289
       }
     },
     {
@@ -66,11 +66,11 @@
             "type": "choice",
             "choice": "p2",
             "probabilities": {
-              "p5": 0.0,
+              "p3": 0.0,
               "none": 0.0,
               "p4": 0.0,
+              "p5": 0.0,
               "p2": 1.0,
-              "p3": 0.0,
               "p1": 0.0
             },
             "confidence": 1.0
@@ -85,7 +85,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000021084",
-        "latency_ms": 235
+        "latency_ms": 209
       }
     },
     {
@@ -95,46 +95,46 @@
       ],
       "decisions": {
         "answers": {
+          "language": {
+            "type": "noul",
+            "noul": 1.0
+          },
           "outcome": {
             "type": "choice",
             "choice": "refund_denied",
             "probabilities": {
               "other": 0.0,
-              "refund_denied": 1.0,
-              "refund_confirmed": 0.0
+              "refund_confirmed": 0.0,
+              "refund_denied": 1.0
             },
             "confidence": 1.0
-          },
-          "language": {
-            "type": "noul",
-            "noul": 1.0
           }
         },
         "source": "jev",
         "model": "jev-1.13.0",
         "usage": {
-          "input_tokens": 423,
+          "input_tokens": 456,
           "output_tokens": 62,
           "cache_read_tokens": 0,
           "cache_write_tokens": 0
         },
-        "cost_usd": "0.000017766",
-        "latency_ms": 195
+        "cost_usd": "0.000019152",
+        "latency_ms": 200
       }
     }
   ],
   "writer": [
     {
-      "text": "Hi Henry,\n\nThank you for reaching out. We're unable to refund the $35.00 overdraft fee from September 21, because our refund policy doesn't apply to accounts with a debt in collections. Is there anything else we can help you with?\n\nRiverbend Credit Union Member Support",
+      "text": "Hi Henry,\n\nThank you for reaching out. We're unable to refund the $35.00 overdraft fee from September 21, because there is a debt in collections on your account, and our refund policy doesn't apply in that situation. Is there anything else we can help you with?\n\nRiverbend Credit Union Member Support",
       "model": "claude-sonnet-5-5",
       "usage": {
         "input_tokens": 185,
-        "output_tokens": 95,
+        "output_tokens": 101,
         "cache_read_tokens": 1082,
         "cache_write_tokens": 0
       },
-      "cost_usd": "0.0015364",
-      "latency_ms": 2008
+      "cost_usd": "0.0015964",
+      "latency_ms": 1687
     }
   ]
 }

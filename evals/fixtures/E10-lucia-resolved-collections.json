@@ -14,14 +14,14 @@
             "choice": "fee_refund",
             "probabilities": {
               "other_banking": 0.0,
-              "unclear": 0.0,
-              "fee_refund": 1.0
+              "fee_refund": 1.0,
+              "unclear": 0.0
             },
             "confidence": 1.0
           },
           "injection": {
             "type": "noul",
-            "noul": 0.07
+            "noul": 0.06
           },
           "language": {
             "type": "choice",
@@ -37,11 +37,11 @@
             "type": "choice",
             "choice": "neutral",
             "probabilities": {
-              "neutral": 0.87,
+              "upset": 0.14,
               "friendly": 0.01,
-              "upset": 0.12
+              "neutral": 0.85
             },
-            "confidence": 0.8
+            "confidence": 0.78
           }
         },
         "source": "jev",
@@ -53,7 +53,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000027594",
-        "latency_ms": 252
+        "latency_ms": 230
       }
     },
     {
@@ -66,12 +66,12 @@
             "type": "choice",
             "choice": "p1",
             "probabilities": {
+              "p3": 0.0,
               "p4": 0.0,
               "none": 0.0,
-              "p5": 0.0,
-              "p2": 0.0,
               "p1": 1.0,
-              "p3": 0.0
+              "p2": 0.0,
+              "p5": 0.0
             },
             "confidence": 1.0
           }
@@ -85,7 +85,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000023142",
-        "latency_ms": 212
+        "latency_ms": 203
       }
     },
     {
@@ -95,10 +95,6 @@
       ],
       "decisions": {
         "answers": {
-          "language": {
-            "type": "noul",
-            "noul": 1.0
-          },
           "outcome": {
             "type": "choice",
             "choice": "refund_confirmed",
@@ -108,18 +104,22 @@
               "other": 0.0
             },
             "confidence": 1.0
+          },
+          "language": {
+            "type": "noul",
+            "noul": 1.0
           }
         },
         "source": "jev",
         "model": "jev-1.13.0",
         "usage": {
-          "input_tokens": 406,
+          "input_tokens": 432,
           "output_tokens": 63,
           "cache_read_tokens": 0,
           "cache_write_tokens": 0
         },
-        "cost_usd": "0.000017052",
-        "latency_ms": 207
+        "cost_usd": "0.000018144",
+        "latency_ms": 191
       }
     }
   ],
@@ -134,7 +134,7 @@
         "cache_write_tokens": 0
       },
       "cost_usd": "0.0012064",
-      "latency_ms": 1423
+      "latency_ms": 1496
     }
   ]
 }

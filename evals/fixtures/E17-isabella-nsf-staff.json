@@ -13,9 +13,9 @@
             "type": "choice",
             "choice": "fee_refund",
             "probabilities": {
-              "fee_refund": 1.0,
+              "other_banking": 0.0,
               "unclear": 0.0,
-              "other_banking": 0.0
+              "fee_refund": 1.0
             },
             "confidence": 1.0
           },
@@ -28,8 +28,8 @@
             "choice": "en",
             "probabilities": {
               "es": 0.0,
-              "other": 0.0,
-              "en": 1.0
+              "en": 1.0,
+              "other": 0.0
             },
             "confidence": 1.0
           },
@@ -37,11 +37,11 @@
             "type": "choice",
             "choice": "neutral",
             "probabilities": {
-              "friendly": 0.02,
-              "neutral": 0.55,
-              "upset": 0.43
+              "upset": 0.4,
+              "friendly": 0.01,
+              "neutral": 0.59
             },
-            "confidence": 0.33
+            "confidence": 0.38
           }
         },
         "source": "jev",
@@ -53,7 +53,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000027804",
-        "latency_ms": 225
+        "latency_ms": 234
       }
     },
     {
@@ -66,12 +66,12 @@
             "type": "choice",
             "choice": "p1",
             "probabilities": {
-              "none": 0.0,
-              "p3": 0.0,
-              "p2": 0.0,
               "p1": 1.0,
+              "p2": 0.0,
+              "p3": 0.0,
+              "p4": 0.0,
               "p5": 0.0,
-              "p4": 0.0
+              "none": 0.0
             },
             "confidence": 1.0
           }
@@ -85,7 +85,7 @@
           "cache_write_tokens": 0
         },
         "cost_usd": "0.000023142",
-        "latency_ms": 276
+        "latency_ms": 202
       }
     },
     {
@@ -113,13 +113,13 @@
         "source": "jev",
         "model": "jev-1.13.0",
         "usage": {
-          "input_tokens": 408,
+          "input_tokens": 434,
           "output_tokens": 63,
           "cache_read_tokens": 0,
           "cache_write_tokens": 0
         },
-        "cost_usd": "0.000017136",
-        "latency_ms": 227
+        "cost_usd": "0.000018228",
+        "latency_ms": 219
       }
     }
   ],
@@ -134,7 +134,7 @@
         "cache_write_tokens": 0
       },
       "cost_usd": "0.0012244",
-      "latency_ms": 1446
+      "latency_ms": 1461
     }
   ]
 }
