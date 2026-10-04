@@ -178,6 +178,7 @@ The app is public on Railway and moves money (even fake), so every endpoint exce
 | GET | `/cases` | Queue (R-01). Optional `?status=` filter |
 | GET | `/cases/{id}` | Case detail: messages, latest run + steps, current proposal, evidence, decision |
 | POST | `/cases/{id}/run` | Runs the flow. `Accept: text/event-stream` → SSE; otherwise JSON result. 409 if a run is in progress or the case is resolved |
+| POST | `/cases/prepare-new` | Runs every `new` case, one after another, on the server (R-03). SSE progress (§4.4). 409 while another batch runs. A case at its hourly run limit or already running is skipped, never retried |
 | POST | `/cases/{id}/decision` | Requires `Idempotency-Key` (UUID). Body below |
 | POST | `/auth/login` · `/auth/logout` · GET `/auth/me` | §4.0 |
 
@@ -250,6 +251,12 @@ event: step      data: {"name":"screen","label":"Reading the message","status":"
 event: step      data: {"name":"screen","label":"Reading the message","status":"done","duration_ms":312}
 event: completed data: {<case detail>}
 event: failed    data: {"message":"<plain text>"}
+```
+`POST /cases/prepare-new` (the batch keeps going if the browser disconnects):
+```
+event: case      data: {"index":1,"total":18,"case_id":5013,"member_name":"Daniel Kim","status":"running"}
+event: case      data: {"index":1,"total":18,"case_id":5013,"member_name":"Daniel Kim","status":"auto_resolved","status_label":"Refunded automatically"}
+event: done      data: {"total":18,"prepared":17,"skipped":1}
 ```
 Frontend uses `@microsoft/fetch-event-source` (POST + SSE).
 
@@ -472,6 +479,7 @@ JEV_BASE_URL=https://api.typesafe.ai
 JEV_MODEL=jev-latest
 JEV_TIMEOUT_SECONDS=10
 RUN_TIMEOUT_SECONDS=90
+LOCAL_TIMEZONE=America/Chicago   # replies get local timestamps, refunds the local date
 # business rules (see business-rules.md)
 REFUND_LIMIT_PER_WINDOW=3
 REFUND_WINDOW_DAYS=365

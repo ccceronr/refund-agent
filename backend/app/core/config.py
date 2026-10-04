@@ -6,8 +6,9 @@ The admin database URL is deliberately absent: only the roles bootstrap reads it
 
 from decimal import Decimal
 from typing import Annotated, Any, Literal, Self
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import BeforeValidator, Field, SecretStr, model_validator
+from pydantic import BeforeValidator, Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 MIN_SESSION_SECRET_LENGTH = 32
@@ -59,6 +60,9 @@ class Settings(BaseSettings):
     injection_threshold: Probability = 0.5
     auto_max_injection: Probability = 0.1
 
+    # Where the credit union is: replies get local timestamps, refunds the local date.
+    local_timezone: str = "America/Chicago"
+
     session_secret: SecretStr | None = None
     session_max_age_seconds: Annotated[int, Field(ge=60)] = 8 * 60 * 60  # design §4.0: 8 h
     login_max_failures: Annotated[int, Field(ge=1)] = 5
@@ -73,6 +77,15 @@ class Settings(BaseSettings):
     cors_origins: CommaSeparated = []
 
     fault_injection: Literal["", "jev_down", "anthropic_down", "slow"] = ""
+
+    @field_validator("local_timezone")
+    @classmethod
+    def _known_timezone(cls, value: str) -> str:
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError) as error:
+            raise ValueError("LOCAL_TIMEZONE must be an IANA name like America/Chicago") from error
+        return value
 
     @property
     def is_production(self) -> bool:

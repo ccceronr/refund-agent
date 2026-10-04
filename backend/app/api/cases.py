@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from fastapi.sse import EventSourceResponse, format_sse_event
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
+from app.agents.batch import NewCase, prepare_cases
 from app.agents.run_case import RunResult
 from app.agents.steps import QueueSink
 from app.api.dependencies import (
@@ -29,6 +30,7 @@ from app.rules.model import Thresholds
 from app.services.auth import StaffMember
 from app.services.case_views import case_detail, done_since, list_cases
 from app.services.decisions import DecisionRequest
+from app.services.errors import PreparationInProgress
 from app.services.refunds import Actor
 from app.services.view_models import CaseDetail, CaseListItem
 
@@ -39,6 +41,8 @@ ReplyText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1
 Reason = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
 EVENT_STREAM = "text/event-stream"
 RUN_ENDED_WITHOUT_RESULT = "Preparing this case failed. Try again, or handle it yourself."
+BATCH_ENDED_EARLY = "Preparing the new messages stopped early. Try again in a moment."
+FINAL_BATCH_EVENTS = frozenset({"done", "failed"})
 
 log = structlog.get_logger(__name__)
 
@@ -109,6 +113,28 @@ async def run_case(
     return JSONResponse(await detail())
 
 
+async def prepare_new(
+    request: Request, engine: RwEngine, settings: AppSettings, runners: RunnerFactory
+) -> EventSourceResponse:
+    """R-03: prepares every new case on the server, one after another, with SSE progress."""
+    lock: asyncio.Lock = request.app.state.batch_lock
+    if lock.locked():
+        raise PreparationInProgress
+    await lock.acquire()  # never waits: just checked, and no await in between
+    try:
+        since = done_since(datetime.now(UTC), settings.queue_done_window_hours)
+        async with engine.connect() as connection:
+            queue = await list_cases(connection, status="new", done_since=since)
+    except BaseException:
+        lock.release()
+        raise
+    events = QueueSink()
+    cases = [NewCase(item.id, item.member_name) for item in queue]
+    batch = asyncio.create_task(_release_when_done(lock, prepare_cases(cases, runners, events)))
+    _keep_until_done(request, batch)
+    return EventSourceResponse(_batch_sse(events, batch))
+
+
 async def decide(
     case_id: CaseId,
     body: DecisionBody,
@@ -128,6 +154,7 @@ async def decide(
 
 router = APIRouter(prefix="/cases")
 router.add_api_route("", list_queue, methods=["GET"])
+router.add_api_route("/prepare-new", prepare_new, methods=["POST"])
 router.add_api_route("/{case_id}", get_case, methods=["GET"])
 router.add_api_route("/{case_id}/run", run_case, methods=["POST"])
 router.add_api_route("/{case_id}/decision", decide, methods=["POST"])
@@ -137,10 +164,25 @@ def _actor(staff: StaffMember) -> Actor:
     return Actor(staff.staff_id, staff.role)
 
 
-def _keep_until_done(request: Request, run: asyncio.Task[RunResult]) -> None:
-    running: set[asyncio.Task[RunResult]] = request.app.state.running
-    running.add(run)
-    run.add_done_callback(running.discard)
+def _keep_until_done(request: Request, task: asyncio.Task[Any]) -> None:
+    running: set[asyncio.Task[Any]] = request.app.state.running
+    running.add(task)
+    task.add_done_callback(running.discard)
+
+
+async def _release_when_done(lock: asyncio.Lock, work: Awaitable[None]) -> None:
+    try:
+        await work
+    finally:
+        lock.release()
+
+
+async def _batch_sse(events: QueueSink, batch: asyncio.Task[None]) -> AsyncIterator[bytes]:
+    while True:
+        name, data = await _next_event(events, batch, BATCH_ENDED_EARLY)
+        yield _event(name, data)
+        if name in FINAL_BATCH_EVENTS:
+            return
 
 
 async def _sse(
@@ -149,7 +191,7 @@ async def _sse(
     detail: Callable[[], Awaitable[dict[str, Any]]],
 ) -> AsyncIterator[bytes]:
     while True:
-        name, data = await _next_event(events, run)
+        name, data = await _next_event(events, run, RUN_ENDED_WITHOUT_RESULT)
         if name == "completed":
             yield _event("completed", await detail())
             return
@@ -159,14 +201,14 @@ async def _sse(
 
 
 async def _next_event(
-    events: QueueSink, run: asyncio.Task[RunResult]
+    events: QueueSink, work: asyncio.Task[Any], ended_early: str
 ) -> tuple[str, dict[str, Any]]:
     while True:
-        if events.queue.empty() and run.done():
-            # The run ended without its final event (it crashed): never leave the UI waiting.
-            return "failed", {"message": RUN_ENDED_WITHOUT_RESULT}
+        if events.queue.empty() and work.done():
+            # The work ended without its final event (it crashed): never leave the UI waiting.
+            return "failed", {"message": ended_early}
         getter = asyncio.ensure_future(events.queue.get())
-        await asyncio.wait({getter, run}, return_when=asyncio.FIRST_COMPLETED)
+        await asyncio.wait({getter, work}, return_when=asyncio.FIRST_COMPLETED)
         if getter.done():
             return getter.result()
         getter.cancel()

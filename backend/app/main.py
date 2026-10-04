@@ -3,6 +3,7 @@
 Run with: uvicorn app.main:build_app --factory
 """
 
+import asyncio
 import secrets
 from collections.abc import AsyncIterator, Callable
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
@@ -43,6 +44,7 @@ from app.api.middleware import (
 )
 from app.api.policies import router as policies_router
 from app.api.rate_limit import RateLimits, build_limiter, enforce_rate_limit
+from app.core.clock import LocalClock
 from app.core.config import Settings
 from app.core.logging import configure_logging
 from app.core.version import APP_VERSION
@@ -122,10 +124,13 @@ def _add_services(
 ) -> None:
     throttle = LoginThrottle(settings.login_max_failures, settings.login_lockout_seconds)
     app.state.auth = AuthService(engine, throttle)
-    app.state.decisions = DecisionService(engine, RefundService(Thresholds.from_settings(settings)))
+    clock = LocalClock(settings.local_timezone)
+    refunds = RefundService(Thresholds.from_settings(settings), today=clock.today)
+    app.state.decisions = DecisionService(engine, refunds, clock)
     app.state.limiter = build_limiter(settings)
     app.state.rate_limits = RateLimits(app.state.limiter, settings)
     app.state.running = set()  # runs in flight, kept referenced until they finish
+    app.state.batch_lock = asyncio.Lock()  # one "Prepare new messages" at a time
     decider, writer = flow_models(settings, clients.jev, clients.claude)
 
     def runner_factory(events: EventSink) -> CaseRunner:

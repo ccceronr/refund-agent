@@ -27,6 +27,14 @@ export default defineConfig([
           message:
             'Never render HTML from data: member and model text is plain text.',
         },
+        {
+          // Whatever an effect returns is the cleanup React calls on unmount. A returned
+          // Promise (newer browsers' scrollIntoView) blanked the page in P7b.
+          selector:
+            "CallExpression[callee.name=/^use(Layout)?Effect$/] > ArrowFunctionExpression[body.type!='BlockStatement'][body.type!='ArrowFunctionExpression']",
+          message:
+            'Give effects a { } body (or return a cleanup function): a returned value becomes the cleanup React calls.',
+        },
       ],
     },
   },

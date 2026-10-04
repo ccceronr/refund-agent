@@ -3,7 +3,7 @@ import { CircleAlert } from 'lucide-react'
 import type { CaseDetail } from '../api/types'
 import { formatDay, formatTime } from '../lib/format'
 import { Checklist } from './Checklist'
-import { PolicyQuote } from './PolicyQuote'
+import { type OpenPolicy, PolicyQuote } from './PolicyQuote'
 
 const DECISION_VERBS = {
   approve: 'Approved',
@@ -11,7 +11,15 @@ const DECISION_VERBS = {
   reject: 'Rejected',
 } as const
 
-export function RecommendationCard({ detail }: { detail: CaseDetail }) {
+interface RecommendationCardProps {
+  detail: CaseDetail
+  onOpenPolicy: OpenPolicy
+}
+
+export function RecommendationCard({
+  detail,
+  onOpenPolicy,
+}: RecommendationCardProps) {
   const proposal = detail.proposal
   if (!proposal) return <NotPrepared />
 
@@ -51,7 +59,9 @@ export function RecommendationCard({ detail }: { detail: CaseDetail }) {
       ) : (
         <Checklist checks={proposal.checks} />
       )}
-      {proposal.policy_quote && <PolicyQuote quote={proposal.policy_quote} />}
+      {proposal.policy_quote && (
+        <PolicyQuote quote={proposal.policy_quote} onOpen={onOpenPolicy} />
+      )}
       {detail.decision && (
         <p className="mt-5 border-t border-grey-100 pt-4 text-sm text-grey-500">
           {DECISION_VERBS[detail.decision.action]} by {detail.decision.by} on{' '}

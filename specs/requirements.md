@@ -22,7 +22,10 @@ A **case** is one customer conversation (`conversations` row).
   messages, the recommendation, the reasons, the evidence, the policy quote, the draft reply
   and the available actions.
 - **R-03** When Luis opens a case that has never been prepared, the UI shall start the agent
-  run automatically and show each step live (R-16).
+  run automatically and show each step live (R-16). Staff can also prepare every new case
+  at once ("Prepare new messages"): the server runs them one by one, within the run
+  limits, and the AUTO tier refunds where it applies, without anyone opening the case.
+  (In production the agent would run when each message arrives.)
 
 ### Agent flow
 - **R-04** When a run starts, the system shall screen the member's message for prompt

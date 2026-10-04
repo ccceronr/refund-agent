@@ -12,6 +12,7 @@ import { createRoot } from 'react-dom/client'
 import { ApiError, isSignedOut } from './api/client'
 import { queryKeys } from './api/hooks'
 import App from './App.tsx'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import './index.css'
 
 const MAX_RETRIES = 2
@@ -43,7 +44,9 @@ createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <MotionConfig reducedMotion="user">
-        <App />
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
       </MotionConfig>
     </QueryClientProvider>
   </StrictMode>,
