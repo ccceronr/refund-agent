@@ -10,6 +10,8 @@ con la evidencia en la misma página.
 **En vivo:** https://app-production-6228.up.railway.app — inicia sesión como `luis` (staff) o
 `marta` (supervisora); las contraseñas se comparten con los evaluadores por separado.
 
+**Video de la demo:** [verlo en Google Drive](https://drive.google.com/file/d/1iufN2zEnCXwV6EEIoUvW4yV_8RAj8Nh7/view?usp=sharing).
+
 ![La cola de Luis: listos para ti, necesitan revisión, necesitan supervisor, resueltos hoy](docs/screenshots/p7c/02-overview.png)
 
 ## Ejecutarlo en local (un comando)

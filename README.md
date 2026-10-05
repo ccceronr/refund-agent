@@ -11,6 +11,8 @@ for one click from Luis (or a supervisor), with the evidence on the same page.
 **Live:** https://app-production-6228.up.railway.app — sign in as `luis` (staff) or `marta`
 (supervisor); the passwords are shared with the reviewers separately.
 
+**Demo video:** [watch on Google Drive](https://drive.google.com/file/d/1iufN2zEnCXwV6EEIoUvW4yV_8RAj8Nh7/view?usp=sharing).
+
 ![Luis's queue: ready for you, needs review, needs a supervisor, done today](docs/screenshots/p7c/02-overview.png)
 
 ## Run it locally (one command)
