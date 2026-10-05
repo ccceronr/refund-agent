@@ -62,6 +62,19 @@ loads the demo data (22 cases) and starts the app. When the log shows
 - Start from scratch, deleting the database: `docker compose down -v`.
 - `make help` lists every command (`make check`, `make test`, `make evals`, …).
 
+## Who does what
+
+- **Luis (staff)** approves, edits or rejects the agent's proposals, and can approve refunds
+  up to $50 that follow the policy.
+- **Marta (supervisor)** can do everything Luis does, plus approve refunds over $50 and make
+  policy exceptions (a fourth refund in 12 months, a late claim…), and sees how each case
+  was prepared (steps, time, cost). Nobody can refund a fee twice.
+- **How a case reaches Marta:** Marta's queue starts with *Needs a supervisor*. A case lands
+  there automatically when the refund is over Luis's limit (none in the demo data: every fee
+  is $35), or when Luis clicks *Ask a supervisor* on a case ready for Luis ("Asked by
+  Luis"); Luis then waits for Marta's decision. All of this is enforced on the server
+  (BR-09).
+
 ## Demo walkthrough
 
 1. **Daniel (5013)**: open it. The case is prepared live (each step streams in), the rules

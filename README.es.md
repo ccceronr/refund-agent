@@ -61,6 +61,20 @@ carga los datos de la demo (22 casos) y arranca la app. Cuando el log muestre
 - Empezar de cero, borrando la base: `docker compose down -v`.
 - `make help` lista todos los comandos (`make check`, `make test`, `make evals`, …).
 
+## Quién hace qué
+
+- **Luis (staff)** aprueba, edita o rechaza las propuestas del agente, y puede aprobar
+  reembolsos de hasta $50 que cumplan la política.
+- **Marta (supervisora)** puede hacer todo lo que hace Luis y además aprobar reembolsos de más
+  de $50 y hacer excepciones a la política (un cuarto reembolso en 12 meses, un pedido fuera
+  de plazo…); también ve cómo se preparó cada caso (pasos, tiempo y costo). Nadie puede
+  reembolsar dos veces la misma comisión.
+- **Cómo le llega un caso a Marta:** la cola de Marta empieza por *Needs a supervisor*. Un
+  caso llega ahí automáticamente cuando el reembolso supera el límite de Luis (en los datos de
+  la demo no hay ninguno: todas las comisiones son de $35), o cuando Luis hace clic en *Ask a
+  supervisor* en un caso listo para Luis ("Asked by Luis"); entonces Luis espera la decisión
+  de Marta. Todo esto se aplica en el servidor (BR-09).
+
 ## Recorrido de la demo
 
 1. **Daniel (5013)**: ábrelo. El caso se prepara en vivo (cada paso va apareciendo), las
